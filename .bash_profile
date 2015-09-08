@@ -6,27 +6,26 @@ export AWS_ACCESS_KEY_ID=
 export AWS_SECRET_ACCESS_KEY=
 export LEIN_JVM_OPTS="-Dapple.awt.UIElement=true"
 export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_45.jdk/Contents/Home
-export PROJ=
+export PROJ=/Users/dsargeant/Projects
 
 # Path
-export PATH=$PATH:~/Library/Haskell/bin:~/bin
+export PATH=$PATH:~/bin
 
 # Aliases
 alias ls="ls -G"
 alias ll="ls -lhaG"
-alias ebp="vim ~/.bash_profile"
 alias grep="grep --color=auto"
-alias less="/usr/local/Cellar/vim/7.4.488/share/vim/vim74/macros/less.sh"
 alias gs="git status"
 alias ga="git add"
 alias gco="git checkout"
+alias e="emacs --no-splash"
 alias emacsd="emacs --daemon"
+alias magit="emacs --load='~/.emacs.d/magit-init.el' --no-splash"
 alias google="open -a 'Google Chrome'"
 alias ff="open -a 'Firefox'"
-alias cljdocs="open -a 'Firefox' http://clojuredocs.org"
-alias vsc="open -a 'Visual Studio Code'"
 alias ack="ack -s --smart-case"
 alias datez="date -u '+%Y-%m-%dT%H:%M:%SZ'"
+alias ebp="vim ~/.bash_profile"
 
 parse_git_branch() {
     git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/ [\1]/'
