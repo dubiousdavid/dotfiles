@@ -1,32 +1,29 @@
+" Turn off vi compatibility
 set nocompatible
 filetype off
 
-set rtp+=~/.vim/bundle/Vundle.vim
-call vundle#begin()
-
+call plug#begin()
 " Plugins
-Plugin 'gmarik/Vundle.vim'
-Plugin 'bling/vim-airline'
-Plugin 'EasyMotion'
-Plugin 'tir_black'
-Plugin 'airblade/vim-gitgutter'
-Plugin 'guns/vim-sexp'
-Plugin 'ctrlpvim/ctrlp.vim'
-Plugin 'ntpeters/vim-better-whitespace'
-Plugin 'tpope/vim-fireplace'
-Plugin 'mileszs/ack.vim'
-Plugin 'lambdatoast/elm.vim'
-Plugin 'guns/vim-clojure-static'
-Plugin 'tpope/vim-repeat'
-Plugin 'YankRing.vim'
-Plugin 'othree/html5.vim'
-Plugin 'matchit.zip'
-Plugin 'mbbill/undotree'
-" Plugin 'scrooloose/syntastic'
-" Plugin 'venantius/vim-eastwood'
-" Plugin 'tpope/vim-surround'
-
-call vundle#end()
+Plug 'bling/vim-airline'
+Plug 'EasyMotion'
+Plug 'tir_black'
+Plug 'airblade/vim-gitgutter'
+Plug 'ctrlpvim/ctrlp.vim'
+Plug 'ntpeters/vim-better-whitespace'
+Plug 'mileszs/ack.vim'
+Plug 'tpope/vim-repeat'
+Plug 'YankRing.vim'
+Plug 'matchit.zip'
+Plug 'mbbill/undotree'
+Plug 'othree/html5.vim', {'for': 'html,xml'}
+Plug 'guns/vim-sexp', {'for': 'lisp,scheme,clojure'}
+Plug 'guns/vim-clojure-static', {'for': 'clojure'}
+Plug 'tpope/vim-fireplace', {'for': 'clojure'}
+Plug 'scrooloose/syntastic', {'for': 'fhsarp'}
+Plug 'ervandew/supertab', {'for': 'fhsarp'}
+Plug 'fsharp/vim-fsharp', {'for': 'fsharp', 'do': 'make fsautocomplete'}
+Plug 'lambdatoast/elm.vim', {'for': 'elm'}
+call plug#end()
 filetype plugin indent on
 
 " Turn off beeping
@@ -198,15 +195,20 @@ function! s:init_lisp()
   imap <silent><buffer> ]               <Plug>(sexp_insert_closing_square)
   imap <silent><buffer> {               <Plug>(sexp_insert_opening_curly)
   imap <silent><buffer> }               <Plug>(sexp_insert_closing_curly)
-
-  " Indentation
-  setlocal lispwords=as->,binding,bound-fn,case,catch,cond->,cond->>,condp,def,definline,definterface,defmacro,defmethod,defmulti,defn,defn-,defonce,defprotocol,defrecord,defstruct,deftest,deftest-,deftype,doseq,dotimes,doto,extend,extend-protocol,extend-type,fn,for,if,if-let,if-not,if-some,let,letfn,locking,loop,ns,proxy,reify,set-test,testing,when,when-first,when-let,when-not,when-some,while,with-bindings,with-in-str,with-local-vars,with-open,with-precision,with-redefs,with-redefs-fn,with-test,some->,some->>,go-loop,facts,fact
 endfunction
 
-augroup INIT_LISP
-  autocmd!
-  autocmd FileType clojure,scheme,lisp,timl call s:init_lisp()
-augroup END
+function s:init_clojure()
+  " Fireplace
+  nmap <Leader>r :Require<CR>
+  " Clojure indentation
+  setlocal lispwords=as->,binding,bound-fn,case,catch,cond->,cond->>,condp,def,definline,definterface,defmacro,defmethod,defmulti,defn,defn-,defonce,defprotocol,defrecord,defstruct,deftest,deftest-,deftype,doseq,dotimes,doto,extend,extend-protocol,extend-type,fn,for,if,if-let,if-not,if-some,let,letfn,locking,loop,ns,proxy,reify,set-test,testing,when,when-first,when-let,when-not,when-some,while,with-bindings,with-in-str,with-local-vars,with-open,with-precision,with-redefs,with-redefs-fn,with-test,some->,some->>,go-loop,facts,fact
+  " Clojure custom keywords
+  let g:clojure_syntax_keywords={'clojureDefine': ['defn$','defna','defnv'], 'clojureSpecial': ['fn$','fna','fnv']}
+endfunction
+
+" Initialize lisp languages
+autocmd FileType clojure,scheme,lisp call s:init_lisp()
+autocmd FileType clojure call s:init_clojure()
 " Trailing whitespace
 let g:strip_whitespace_on_save=1
 " Ack
@@ -219,10 +221,6 @@ nmap <Leader>cf :CtrlPClearCache<CR>
 nmap <Leader>b :CtrlPBuffer<CR>
 let g:ctrlp_open_new_file='r'
 let g:ctrlp_open_multiple_files='i'
-" Clojure
-let g:clojure_syntax_keywords={'clojureDefine': ['defn$','defna','defnv'], 'clojureSpecial': ['fn$','fna','fnv']}
-" Fireplace
-nmap <Leader>r :Require<CR>
 " YankRing
 nmap <Leader>y :YRShow<CR>
 function! YRRunAfterMaps()
@@ -234,5 +232,3 @@ let g:EasyMotion_leader_key='m'
 nmap <Leader>u :UndotreeToggle<CR>
 let g:undotree_SetFocusWhenToggle=1
 let g:undotree_DiffAutoOpen=1
-let g:undotree_TreeNodeShape='o'
-
