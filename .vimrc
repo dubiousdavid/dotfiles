@@ -8,19 +8,24 @@ Plug 'bling/vim-airline'
 Plug 'EasyMotion'
 Plug 'tir_black'
 Plug 'airblade/vim-gitgutter'
-Plug 'ctrlpvim/ctrlp.vim'
 Plug 'ntpeters/vim-better-whitespace'
-Plug 'mileszs/ack.vim'
 Plug 'tpope/vim-repeat'
 Plug 'YankRing.vim'
 Plug 'matchit.zip'
-Plug 'mbbill/undotree'
+Plug 'tpope/vim-surround'
+Plug 'ctrlpvim/ctrlp.vim', {'on': ['CtrlP','CtrlPClearCache','CtrlPBuffer']}
+Plug 'mileszs/ack.vim', {'on': 'Ack'}
+Plug 'mbbill/undotree', {'on': 'UndotreeToggle'}
+Plug 'mtth/scratch.vim', {'on': ['Scratch', 'ScratchInsert']}
+Plug 'xolox/vim-misc', {'on': ['Note', 'NoteFromSelectedText', 'DeleteNote', 'SearchNotes']}
+Plug 'xolox/vim-notes', {'on': ['Note', 'NoteFromSelectedText', 'DeleteNote', 'SearchNotes']}
+Plug 'smerrill/vcl-vim-plugin', {'for': 'vcl'}
 Plug 'othree/html5.vim', {'for': 'html,xml'}
 Plug 'guns/vim-sexp', {'for': 'lisp,scheme,clojure'}
 Plug 'guns/vim-clojure-static', {'for': 'clojure'}
 Plug 'tpope/vim-fireplace', {'for': 'clojure'}
-Plug 'scrooloose/syntastic', {'for': 'fhsarp'}
-Plug 'ervandew/supertab', {'for': 'fhsarp'}
+Plug 'scrooloose/syntastic', {'for': 'fsharp'}
+Plug 'ervandew/supertab', {'for': 'fsharp'}
 Plug 'fsharp/vim-fsharp', {'for': 'fsharp', 'do': 'make fsautocomplete'}
 Plug 'lambdatoast/elm.vim', {'for': 'elm'}
 call plug#end()
@@ -53,8 +58,6 @@ set incsearch
 set ic
 " Enable mouse in all modes
 set mouse=a
-" Automatically re-read files changed outside Vim
-set autoread
 " <Leader>
 let mapleader=','
 let maplocalleader=','
@@ -86,6 +89,10 @@ nmap <C-j> :bp!<CR>
 nmap <C-k> :bn!<CR>
 " Last buffer
 nmap <C-l> :e#<CR>
+" Visual mode delimiter insertion
+vmap s( "zdi(<C-R>z)<Esc>
+vmap s[ "zdi[<C-R>z]<Esc>
+vmap s{ "zdi{<C-R>z}<Esc>
 " Sexp
 let g:sexp_filetypes=''
 let g:sexp_insert_after_wrap=1
@@ -215,8 +222,8 @@ let g:strip_whitespace_on_save=1
 let g:ack_default_options=' -s -H --no-color --smart-case --nogroup --column --literal'
 nmap <Leader>a :Ack<Space>
 " Ctrlp
-let g:ctrlp_map='<Leader>f'
 let g:ctrlp_root_markers=['project.clj']
+nmap <Leader>f :CtrlP<CR>
 nmap <Leader>cf :CtrlPClearCache<CR>
 nmap <Leader>b :CtrlPBuffer<CR>
 let g:ctrlp_open_new_file='r'
@@ -232,3 +239,8 @@ let g:EasyMotion_leader_key='m'
 nmap <Leader>u :UndotreeToggle<CR>
 let g:undotree_SetFocusWhenToggle=1
 let g:undotree_DiffAutoOpen=1
+" Notes
+let g:notes_directories=['~/Dropbox/Notes']
+" Scratch
+let g:scratch_insert_autohide=0
+nmap gs :ScratchInsert<CR>
