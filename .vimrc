@@ -43,6 +43,9 @@ set title
 set shiftwidth=2
 set tabstop=2
 set expandtab
+set smarttab
+" Allow backspace in insert mode
+set backspace=indent,eol,start
 " Use OS clipboard
 set clipboard=unnamed
 " Use undo file to maintain undo state per buffer
