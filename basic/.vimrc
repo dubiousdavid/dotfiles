@@ -21,6 +21,8 @@ set incsearch
 set ic
 " Enable mouse in all modes
 set mouse=a
+" Color theme
+colorscheme tir_black
 " <Leader>
 let mapleader=','
 let maplocalleader=','
