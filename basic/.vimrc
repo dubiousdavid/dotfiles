@@ -29,6 +29,8 @@ colorscheme tir_black
 " <Leader>
 let mapleader=','
 let maplocalleader=','
+" Remap Y
+nmap Y y$
 " Backspace closes buffer
 nmap <BS> :bd<CR>
 " Buffer previous
