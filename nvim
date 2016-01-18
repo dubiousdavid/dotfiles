@@ -1,0 +1,4 @@
+source ~/.vimrc
+
+" Terminal
+tnoremap <Esc> <C-\><C-n>
