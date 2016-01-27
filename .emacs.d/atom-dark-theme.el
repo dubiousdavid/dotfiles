@@ -40,7 +40,7 @@
  ;; Basic
  '(button ((t (:inherit (link)))))
  '(cursor ((((background light)) (:background "black")) (((background dark)) (:background "white"))))
- '(default ((t (:foreground "#c5c8c6" :background "#000000" :weight normal :slant normal :underline nil :overline nil :strike-through nil :box nil :inverse-video nil :stipple nil :inherit nil))))
+ '(default ((t (:foreground "#FFFFFF" :background "#000000" :weight normal :slant normal :underline nil :overline nil :strike-through nil :box nil :inverse-video nil :stipple nil :inherit nil))))
  '(escape-glyph ((t (:foreground "#FF8000"))))
  '(fixed-pitch ((t (:family "Monospace"))))
  '(header-line ((t (:foreground "grey90" :background "grey20"))))
@@ -63,7 +63,7 @@
  '(font-lock-builtin-face ((t (:foreground "#DAD085"))))
  '(font-lock-comment-delimiter-face ((default (:inherit (font-lock-comment-face)))))
  '(font-lock-comment-face ((t (:foreground "#7C7C7C"))))
- '(font-lock-constant-face ((t (:foreground "#99CC99"))))
+ '(font-lock-constant-face ((t (:foreground "#e18964"))))
  '(font-lock-doc-face ((t (:inherit (font-lock-string-face)))))
  '(font-lock-function-name-face ((t (:foreground "#FFD2A7"))))
  '(font-lock-keyword-face ((t (:foreground "#96CBFE"))))
@@ -71,10 +71,10 @@
  '(font-lock-regexp-grouping-backslash ((t (:inherit font-lock-string-face))))
  '(font-lock-regexp-grouping-construct ((t (:foreground "#C6A24F"))))
  '(font-lock-string-face ((t (:foreground "#8AE234"))))
- '(font-lock-type-face ((t (:foreground "#CFCB90"))))
-;;  '(font-lock-type-face ((t (:foreground "#FFFFB6" :underline t))))
+ '(font-lock-type-face ((t (:foreground "#e18964"))))
  '(font-lock-variable-name-face ((t (:inherit (default)))))
  '(font-lock-warning-face ((t (:foreground "#ff982d" :weight bold))))
+ '(highlight-numbers-number ((t (:foreground "#FF73FD"))))
 
  ;; mode-line
  '(mode-line ((t (:background "grey10" :foreground "#96CBFE"))))
