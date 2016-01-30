@@ -1,8 +1,9 @@
 # dotfiles
 
-* Vim
-* Emacs (emacs live)
-* Bash Profile
+* Neovim/Vim
+* Emacs (evil mode)
+* zshrc
 * Git
 * Leiningen
 * Ack
+* Tmux
