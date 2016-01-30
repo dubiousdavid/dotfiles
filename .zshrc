@@ -93,6 +93,13 @@ function proj {
     cd $PROJ/$1
 }
 
+# Change to root directory of current git repo
+function groot {
+     git branch > /dev/null 2>&1 || return 1
+     cd "$(git rev-parse --show-cdup)".
+     pwd
+ }
+
 export BROWSER="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 alias magit="emacs --load='~/.emacs.d/magit-init.el' --no-splash"
 alias v=nvim
