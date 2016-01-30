@@ -5,28 +5,28 @@ filetype plugin indent on
 
 " Load plugins
 call plug#begin()
-Plug 'bling/vim-airline'
-Plug 'EasyMotion'
 Plug 'tir_black'
+Plug 'vim-airline/vim-airline'
+Plug 'EasyMotion'
 Plug 'airblade/vim-gitgutter'
 Plug 'ntpeters/vim-better-whitespace'
 Plug 'tpope/vim-repeat'
 Plug 'YankRing.vim'
-Plug 'matchit.zip'
 Plug 'tpope/vim-surround'
-Plug 'drmingdrmer/xptemplate'
+Plug 'tomtom/tcomment_vim'
+Plug 'matchit.zip', {'for': ['html', 'xml', 'sh', 'vim']}
 Plug 'lambdalisue/vim-manpager', {'on': 'MANPAGER'}
 Plug 'lambdalisue/vim-pager', {'on': 'PAGER'}
 Plug 'powerman/vim-plugin-AnsiEsc', {'on': 'PAGER'}
 Plug 'ensime/ensime-vim', {'for': 'scala'}
-Plug 'derekwyatt/vim-scala', {'for': 'scala'}
+Plug 'derekwyatt/vim-scala', {'for': ['scala', 'sbt.scala']}
 Plug 'ctrlpvim/ctrlp.vim', {'on': ['CtrlP', 'CtrlPClearCache', 'CtrlPBuffer']}
 Plug 'mileszs/ack.vim', {'on': 'Ack'}
 Plug 'mbbill/undotree', {'on': 'UndotreeToggle'}
 Plug 'mtth/scratch.vim', {'on': ['Scratch', 'ScratchInsert']}
 Plug 'smerrill/vcl-vim-plugin', {'for': 'vcl'}
-Plug 'othree/html5.vim', {'for': 'html,xml'}
-Plug 'guns/vim-sexp', {'for': 'lisp,scheme,clojure'}
+Plug 'othree/html5.vim', {'for': ['html', 'xml']}
+Plug 'guns/vim-sexp', {'for': 'clojure'}
 Plug 'guns/vim-clojure-static', {'for': 'clojure'}
 Plug 'tpope/vim-fireplace', {'for': 'clojure'}
 Plug 'scrooloose/syntastic', {'for': 'fsharp'}
@@ -60,8 +60,10 @@ set undofile
 set number
 " Searching
 set incsearch
-set ic
+set ignorecase smartcase
 set nohls
+" Better? completion on command line
+set wildmenu
 " Enable mouse in all modes
 set mouse=a
 " Omnicomplete
@@ -71,11 +73,13 @@ let mapleader=','
 let maplocalleader=','
 " Enable edn filetype detection
 autocmd BufNewFile,BufRead *.edn setlocal filetype=clojure
+" Enable sc filetype detection
+autocmd BufNewFile,BufRead *.sc setlocal filetype=scala
 " HTML autocompletion
 autocmd FileType html set omnifunc=htmlcomplete#CompleteTags
 " vim-airline
 set laststatus=2
-let g:airline_powerline_fonts = 1
+let g:airline_powerline_fonts=1
 let g:airline#extensions#tabline#enabled=1
 let g:airline#extensions#tabline#show_tab_nr=0
 let g:airline#extensions#tabline#show_close_button=0
@@ -98,6 +102,9 @@ nmap <C-j> :bp!<CR>
 nmap <C-k> :bn!<CR>
 " Last buffer
 nmap <C-l> :e#<CR>
+" Emacs-like beginning and end of line
+imap <C-e> <C-o>$
+imap <C-a> <C-o>^
 " Trailing whitespace
 let g:strip_whitespace_on_save=1
 " Ack
@@ -107,7 +114,7 @@ nmap <Leader>a :Ack<Space>
 let g:ctrlp_root_markers=['project.clj', 'build.sbt']
 nmap <Leader>f :CtrlP<CR>
 nmap <Leader>cf :CtrlPClearCache<CR>
-" nmap <Leader>b :CtrlPBuffer<CR>
+nmap <Leader>b :CtrlPBuffer<CR>
 let g:ctrlp_open_new_file='r'
 let g:ctrlp_open_multiple_files='i'
 let g:ctrlp_custom_ignore='\v[\/](target)$'
@@ -128,7 +135,6 @@ nmap gs :ScratchInsert<CR>
 " Ensime
 let EnErrorStyle='Underlined'
 autocmd FileType scala nmap <Leader>t :EnType<CR>
-autocmd FileType scala nmap <Leader>d :EnDocUri<CR>
-autocmd FileType scala nmap <Leader>b :EnDocBrowse<CR>
+autocmd FileType scala nmap <Leader>d :EnDocBrowse<CR>
 autocmd FileType scala nmap <Leader>g :EnDeclaration<CR>
 autocmd FileType scala ca format EnFormatSource
