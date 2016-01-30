@@ -1,3 +1,7 @@
 --ignore-file=match:.lein-repl-history
 --ignore-file=match:.nrepl-history
---ignore-dir=target/classes
+--ignore-dir=target
+--ignore-dir=log
+--ignore-dir=tmp
+--ignore-dir=doc
+--ignore-dir=.ensime_cache
