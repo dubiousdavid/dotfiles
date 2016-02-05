@@ -1,5 +1,24 @@
-;; Path to emacs directory
-(defvar emacs-dir "~/.emacs.d/")
+;; Paste pop
+(defun paste-pop (count)
+  "Pop the previous entry in the kill ring."
+  (interactive "p")
+  (let (interprogram-paste-function)
+    (evil-paste-pop count)))
+;; Paste pop next
+(defun paste-pop-next (count)
+  "Pop the next entry in the kill ring."
+  (interactive "p")
+  (let (interprogram-paste-function)
+    (evil-paste-pop-next count)))
+;; Copy (OSX)
+(defun copy-from-osx ()
+  (shell-command-to-string "pbpaste"))
+;; Paste (OSX)
+(defun paste-to-osx (text &optional push)
+  (let ((process-connection-type nil))
+    (let ((proc (start-process "pbcopy" "*Messages*" "pbcopy")))
+      (process-send-string proc text)
+      (process-send-eof proc))))
 ;; Duplicate line below
 (defun duplicate-line-below ()
   "Duplicate current line below."
@@ -28,7 +47,7 @@
   (delete-other-windows))
 ;; Load local file
 (defun load-local (f)
-  (load-file (concat emacs-dir f)))
+  (load-file (concat user-emacs-directory f)))
 ;; Normal mode key chord
 (defmacro normal-key-chord (chord f)
   `(key-chord-define evil-normal-state-map ,chord ,f))
@@ -59,18 +78,20 @@
 ;; Highlight matching bracket
 (show-paren-mode 1)
 ;; Prettify symbols
-(global-prettify-symbols-mode 1)
+(add-hook 'emacs-lisp-mode-hook 'prettify-symbols-mode)
 ;; Highlight current line
 (global-hl-line-mode 1)
 (set-face-background 'hl-line "#1C1C1C")
 ;; Remove trailing whitespace
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
-;; Company 
+;; Company
 (global-set-key (kbd "C-x C-o") 'company-complete)
 ;; Disable menu bar
 (menu-bar-mode -1)
 ;; No bell
 (setq ring-bell-function 'ignore)
+;; Save cursor position
+(save-place-mode t)
 ;; IDO (flx, vertical)
 (require 'flx-ido)
 (ido-mode 1)
@@ -81,6 +102,13 @@
 (setq ido-vertical-define-keys 'C-n-C-p-up-and-down)
 (setq ido-enable-flex-matching t)
 (setq ido-use-faces nil)
+(add-to-list 'ido-ignore-files "\\.DS_Store")
+;; Projectile
+(require 'projectile)
+(projectile-global-mode)
+(setq projectile-globally-ignored-files
+      '(".ensime_cache" ".ensime" "target" "project" "bin" "tmp"))
+(setq projectile-mode-line "")
 ;; Undo tree
 (global-undo-tree-mode)
 ;; Theme
@@ -89,21 +117,34 @@
 (add-hook 'prog-mode-hook 'highlight-numbers-mode)
 ;; Smart mode line
 (setq sml/no-confirm-load-theme t)
+(setq rm-blacklist '(" Undo-Tree" " company" " yas" " s-/"))
 (sml/setup)
-;; Mouse
-(load-local "mouse.el")
-;; OSX
-(load-local "osx.el")
+;; Mouse in terminal
+(xterm-mouse-mode 1)
+;; Mouse yank
+(setq mouse-yank-at-point t)
+;; Enable scrolling
+(global-set-key [mouse-4] (lambda () (interactive) (scroll-down 1)))
+(global-set-key [mouse-5] (lambda () (interactive) (scroll-up 1)))
+;; Input method
+(setq default-input-method "MacOSX")
+;; Make cut and paste work with the OS X clipboard
+(when (not window-system)
+  (setq interprogram-cut-function 'paste-to-osx)
+  (setq interprogram-paste-function 'copy-from-osx))
 ;; Evil mode
 (setq evil-want-C-u-scroll t)
 (setq evil-shift-width 2)
 (setq evil-regexp-search nil)
-(require 'evil)
 (evil-mode 1)
+(evil-set-initial-state 'fundamental-mode 'emacs)
+(evil-set-initial-state 'ensime-inspector-mode 'motion)
+(evil-set-initial-state 'sbt-mode 'insert)
+(evil-declare-change-repeat 'company-complete)
 ;; Leader
 (global-evil-leader-mode)
 (evil-leader/set-leader ",")
-(evil-leader/set-key "f" 'find-file
+(evil-leader/set-key "f" 'projectile-find-file
                      "b" 'switch-to-buffer
                      "k" 'kill-this-buffer
                      "g" 'magit-status
@@ -116,6 +157,9 @@
 (define-key evil-outer-text-objects-map "a" 'evil-outer-arg)
 ;; Comments
 (evil-commentary-mode)
+;; Paste pop
+(normal-key "C-p" 'paste-pop)
+(normal-key "C-n" 'paste-pop-next)
 ;; nmap Y y$
 (normal-key "Y" 'copy-to-end-of-line)
 ;; Buffers
@@ -140,22 +184,24 @@
 (normal-key "_" (split-and-focus split-window-vertically))
 (normal-key "|" (split-and-focus split-window-horizontally))
 ;; Ensime
-(require 'ensime)
-(setq ensime-sem-high-enabled-p nil)
-;; Inspect type
-(eval-after-load 'ensime '(evil-leader/set-key "i" 'ensime-inspect-type-at-point))
-;; Errors and warnings
-(eval-after-load 'ensime '(evil-leader/set-key "e" 'ensime-show-all-errors-and-warnings))
-;; References of symbol
-(eval-after-load 'ensime '(evil-leader/set-key "r" 'ensime-show-uses-of-symbol-at-point))
-;; Jump to definition
-(eval-after-load 'ensime '(evil-leader/set-key "j" 'ensime-edit-definition))
-;; Expand selection
-(eval-after-load 'ensime '(evil-leader/set-key "." 'ensime-expand-selection-command))
-;; Lookup type
-(eval-after-load 'ensime '(evil-leader/set-key "l" 'ensime-search))
-;; SBT
-(eval-after-load 'ensime '(evil-leader/set-key "s" 'ensime-sbt))
+(eval-after-load 'ensime '(setq ensime-sem-high-enabled-p nil))
+(evil-leader/set-key-for-mode 'scala-mode
+  ;; Inspect type
+  "i" 'ensime-inspect-type-at-point
+  ;; Errors and warnings
+  "e" 'ensime-show-all-errors-and-warnings
+  ;; References of symbol
+  "r" 'ensime-show-uses-of-symbol-at-point
+  ;; Jump to definition
+  "j" 'ensime-edit-definition
+  ;; Expand selection
+  "." 'ensime-expand-selection-command
+  ;; Lookup type
+  "l" 'ensime-search
+  ;; SBT
+  "s" 'ensime-sbt)
+;; Find function (elisp)
+(evil-leader/set-key-for-mode 'emacs-lisp-mode "j" 'find-function)
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -163,7 +209,7 @@
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (fsharp-mode evil-args evil-commentary key-chord ack evil-surround evil-numbers smart-mode-line highlight-numbers ace-jump-mode evil-leader ido-vertical-mode flx-ido evil ensime undo-tree magit))))
+    (csharp-mode browse-kill-ring projectile fsharp-mode evil-args evil-commentary key-chord ack evil-surround evil-numbers smart-mode-line highlight-numbers ace-jump-mode evil-leader ido-vertical-mode flx-ido evil ensime undo-tree magit))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
