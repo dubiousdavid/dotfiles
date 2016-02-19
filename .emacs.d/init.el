@@ -37,6 +37,17 @@
   (interactive)
   (let ((current-prefix-arg 4)) ;; emulate C-u
     (call-interactively 'ack)))
+;; Tidy markdown
+(defun tidy-markdown ()
+  (interactive)
+  (shell-command-on-region
+     (point-min)
+     (point-max)
+     "tidy-markdown"
+     (current-buffer)
+     t
+     "*tidy-markdown-error*"
+     t))
 ;; y$
 (defun copy-to-end-of-line ()
   (interactive)
@@ -69,7 +80,7 @@
 (setq package-enable-at-startup nil)
 (package-initialize)
 ;; Manual mode selection
-(add-to-list 'auto-mode-alist '("\\.sc" . scala-mode))
+(add-to-list 'auto-mode-alist '("\\.sc\\'" . scala-mode))
 ;; Line numbers
 (global-linum-mode t)
 (setq linum-format "%4d ")
@@ -79,6 +90,7 @@
 (show-paren-mode 1)
 ;; Prettify symbols
 (add-hook 'emacs-lisp-mode-hook 'prettify-symbols-mode)
+(add-hook 'emacs-lisp-mode-hook 'paredit-mode)
 ;; Highlight current line
 (global-hl-line-mode 1)
 (set-face-background 'hl-line "#1C1C1C")
@@ -117,8 +129,10 @@
 (add-hook 'prog-mode-hook 'highlight-numbers-mode)
 ;; Smart mode line
 (setq sml/no-confirm-load-theme t)
-(setq rm-blacklist '(" Undo-Tree" " company" " yas" " s-/"))
+(setq rm-blacklist '(" Undo-Tree" " yas" " s-/"))
 (sml/setup)
+;; Ack
+(setq ack-command "ag ")
 ;; Mouse in terminal
 (xterm-mouse-mode 1)
 ;; Mouse yank
@@ -132,22 +146,33 @@
 (when (not window-system)
   (setq interprogram-cut-function 'paste-to-osx)
   (setq interprogram-paste-function 'copy-from-osx))
+;; Web mode
+(require 'web-mode)
+(add-to-list 'auto-mode-alist '("\\.erb\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.php\\'" . web-mode))
+;; Markdown mode
+(require 'markdown-mode)
+(add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
+(add-to-list 'auto-mode-alist '("\\.md\\.erb\\'" . markdown-mode))
+(setq markdown-open-command "~/bin/mark")
 ;; Evil mode
 (setq evil-want-C-u-scroll t)
 (setq evil-shift-width 2)
 (setq evil-regexp-search nil)
 (evil-mode 1)
+(load-local "evil-sexp.el")
 (evil-set-initial-state 'fundamental-mode 'emacs)
 (evil-set-initial-state 'ensime-inspector-mode 'motion)
 (evil-set-initial-state 'sbt-mode 'insert)
+(evil-set-initial-state 'ack-mode 'motion)
 (evil-declare-change-repeat 'company-complete)
 ;; Leader
 (global-evil-leader-mode)
 (evil-leader/set-leader ",")
 (evil-leader/set-key "f" 'projectile-find-file
                      "b" 'switch-to-buffer
-                     "k" 'kill-this-buffer
                      "g" 'magit-status
+                     "h" 'github-browse-file
                      "d" 'duplicate-line-below
 		     "a" 'ack-from-root
 		     "u" 'undo-tree-visualize)
@@ -155,8 +180,31 @@
 (require 'evil-args)
 (define-key evil-inner-text-objects-map "a" 'evil-inner-arg)
 (define-key evil-outer-text-objects-map "a" 'evil-outer-arg)
+;; Paredit
+(evil-define-key 'motion emacs-lisp-mode-map
+  (kbd "(") 'evil-backward-sexp
+  (kbd ")") 'evil-forward-sexp)
+(evil-define-key 'visual emacs-lisp-mode-map
+  (kbd "(") 'evil-backward-sexp
+  (kbd ")") 'evil-forward-sexp)
+(evil-define-key 'motion emacs-lisp-mode-map
+  (kbd "{") 'evil-backward-section-begin
+  (kbd "}") 'evil-forward-section-begin)
+(evil-define-key 'visual emacs-lisp-mode-map
+  (kbd "{") 'evil-backward-section-begin
+  (kbd "}") 'evil-forward-section-begin)
+;; Buffers
+(normal-key "DEL" 'kill-this-buffer)
+(normal-key "<up>" 'buf-move-up)
+(normal-key "<down>" 'buf-move-down)
 ;; Comments
 (evil-commentary-mode)
+;; Drag stuff
+(drag-stuff-mode t)
+(normal-key "C-j" 'drag-stuff-down)
+(normal-key "C-k" 'drag-stuff-up)
+(define-key evil-visual-state-map (kbd "C-j") 'drag-stuff-down)
+(define-key evil-visual-state-map (kbd "C-k") 'drag-stuff-up)
 ;; Paste pop
 (normal-key "C-p" 'paste-pop)
 (normal-key "C-n" 'paste-pop-next)
@@ -164,8 +212,6 @@
 (normal-key "Y" 'copy-to-end-of-line)
 ;; Buffers
 (normal-key "C-l" 'evil-buffer)
-(normal-key "C-j" 'previous-buffer)
-(normal-key "C-k" 'next-buffer)
 ;; Key chord
 (require 'key-chord)
 (key-chord-mode 1)
@@ -173,6 +219,10 @@
 (normal-key-chord "mw" 'evil-ace-jump-word-mode)
 (normal-key-chord "ml" 'evil-ace-jump-line-mode)
 (normal-key-chord "mc" 'evil-ace-jump-char-mode)
+;; Easy motion
+;; (evilem-default-keybindings "[")
+;; (setq avy-keys (append (number-sequence ?a ?z) (number-sequence ?A ?Z)))
+;; (setq avy-background t)
 ;; Surround
 (require 'evil-surround)
 (global-evil-surround-mode 1)
@@ -209,7 +259,7 @@
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (csharp-mode browse-kill-ring projectile fsharp-mode evil-args evil-commentary key-chord ack evil-surround evil-numbers smart-mode-line highlight-numbers ace-jump-mode evil-leader ido-vertical-mode flx-ido evil ensime undo-tree magit))))
+    (web-mode markdown-mode json-mode ace-jump-mode key-chord buffer-move drag-stuff paredit csharp-mode browse-kill-ring projectile fsharp-mode evil-args evil-commentary ack evil-surround evil-numbers smart-mode-line highlight-numbers evil-leader ido-vertical-mode flx-ido evil ensime undo-tree magit))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
