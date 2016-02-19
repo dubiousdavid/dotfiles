@@ -5,7 +5,6 @@ filetype plugin indent on
 
 " Load plugins
 call plug#begin()
-Plug 'tir_black'
 Plug 'vim-airline/vim-airline'
 Plug 'EasyMotion'
 Plug 'airblade/vim-gitgutter'
