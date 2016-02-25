@@ -32,6 +32,22 @@
     (forward-line -1)
     (insert line-content)
     (move-to-column origianl-column t)))
+;; Duplicate region
+(defun duplicate-region ()
+  (interactive)
+  (let* ((end (region-end))
+         (text (buffer-substring (region-beginning) end)))
+    (goto-char end)
+    (insert text)
+    (push-mark end)
+    (setq deactivate-mark nil)
+    (exchange-point-and-mark)))
+;; Duplicate line or region
+(defun duplicate-line-or-region ()
+  (interactive)
+  (if mark-active
+      (duplicate-region)
+    (duplicate-line-below)))
 ;; Run ack from root directory
 (defun ack-from-root ()
   (interactive)
@@ -43,7 +59,7 @@
   (shell-command-on-region
      (point-min)
      (point-max)
-     "tidy-markdown"
+     "tidy-markdown --no-ensure-first-header-is-h1"
      (current-buffer)
      t
      "*tidy-markdown-error*"
@@ -59,12 +75,23 @@
 ;; Load local file
 (defun load-local (f)
   (load-file (concat user-emacs-directory f)))
+;; Tern
+(defun start-tern ()
+  (interactive)
+  (tern-mode t)
+  (company-mode t))
 ;; Normal mode key chord
 (defmacro normal-key-chord (chord f)
   `(key-chord-define evil-normal-state-map ,chord ,f))
-;; Normal mode key
+;; Define keys for evil states
 (defmacro normal-key (keys f)
   `(define-key evil-normal-state-map (kbd ,keys) ,f))
+(defmacro insert-key (keys f)
+  `(define-key evil-insert-state-map (kbd ,keys) ,f))
+(defmacro visual-key (keys f)
+  `(define-key evil-visual-state-map (kbd ,keys) ,f))
+(defmacro motion-key (keys f)
+  `(define-key evil-motion-state-map (kbd ,keys) ,f))
 ;; Split and move the cursor to the new split
 (defmacro split-and-focus (f)
   `(lambda ()
@@ -79,18 +106,25 @@
 ;; Initialize packages
 (setq package-enable-at-startup nil)
 (package-initialize)
+;; Smex
+(global-set-key (kbd "M-x") 'smex)
 ;; Manual mode selection
 (add-to-list 'auto-mode-alist '("\\.sc\\'" . scala-mode))
+(add-to-list 'auto-mode-alist '("\\.tern-project\\'" . json-mode))
 ;; Line numbers
 (global-linum-mode t)
 (setq linum-format "%4d ")
 ;; Auto close brackets
-(electric-pair-mode 1)
+;; (electric-pair-mode 1)
 ;; Highlight matching bracket
 (show-paren-mode 1)
-;; Prettify symbols
+;; Smartparens
+(require 'smartparens-config)
+(add-hook 'prog-mode-hook 'smartparens-mode)
+;; Emacs lisp mode
 (add-hook 'emacs-lisp-mode-hook 'prettify-symbols-mode)
-(add-hook 'emacs-lisp-mode-hook 'paredit-mode)
+(add-hook 'emacs-lisp-mode-hook 'smartparens-strict-mode)
+(add-hook 'emacs-lisp-mode-hook 'evil-smartparens-mode)
 ;; Highlight current line
 (global-hl-line-mode 1)
 (set-face-background 'hl-line "#1C1C1C")
@@ -98,12 +132,16 @@
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
 ;; Company
 (global-set-key (kbd "C-x C-o") 'company-complete)
+(eval-after-load 'company '(add-to-list 'company-backends 'company-tern))
 ;; Disable menu bar
 (menu-bar-mode -1)
 ;; No bell
 (setq ring-bell-function 'ignore)
 ;; Save cursor position
 (save-place-mode t)
+;; Indentation
+(setq standard-indent 2)
+(setq js-indent-level 2)
 ;; IDO (flx, vertical)
 (require 'flx-ido)
 (ido-mode 1)
@@ -147,14 +185,13 @@
   (setq interprogram-cut-function 'paste-to-osx)
   (setq interprogram-paste-function 'copy-from-osx))
 ;; Web mode
-(require 'web-mode)
 (add-to-list 'auto-mode-alist '("\\.erb\\'" . web-mode))
 (add-to-list 'auto-mode-alist '("\\.php\\'" . web-mode))
+(add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
 ;; Markdown mode
-(require 'markdown-mode)
 (add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
 (add-to-list 'auto-mode-alist '("\\.md\\.erb\\'" . markdown-mode))
-(setq markdown-open-command "~/bin/mark")
+(eval-after-load 'markdown-mode '(setq markdown-open-command "~/bin/mark"))
 ;; Evil mode
 (setq evil-want-C-u-scroll t)
 (setq evil-shift-width 2)
@@ -165,6 +202,7 @@
 (evil-set-initial-state 'ensime-inspector-mode 'motion)
 (evil-set-initial-state 'sbt-mode 'insert)
 (evil-set-initial-state 'ack-mode 'motion)
+(evil-set-initial-state 'dired-mode 'emacs)
 (evil-declare-change-repeat 'company-complete)
 ;; Leader
 (global-evil-leader-mode)
@@ -173,14 +211,18 @@
                      "b" 'switch-to-buffer
                      "g" 'magit-status
                      "h" 'github-browse-file
-                     "d" 'duplicate-line-below
+                     "d" 'duplicate-line-or-region
 		     "a" 'ack-from-root
 		     "u" 'undo-tree-visualize)
 ;; Args
 (require 'evil-args)
 (define-key evil-inner-text-objects-map "a" 'evil-inner-arg)
 (define-key evil-outer-text-objects-map "a" 'evil-outer-arg)
-;; Paredit
+(motion-key "(" 'evil-backward-arg)
+(motion-key ")" 'evil-forward-arg)
+(visual-key "(" 'evil-backward-arg)
+(visual-key ")" 'evil-forward-arg)
+;; Sexp motions
 (evil-define-key 'motion emacs-lisp-mode-map
   (kbd "(") 'evil-backward-sexp
   (kbd ")") 'evil-forward-sexp)
@@ -193,25 +235,31 @@
 (evil-define-key 'visual emacs-lisp-mode-map
   (kbd "{") 'evil-backward-section-begin
   (kbd "}") 'evil-forward-section-begin)
+(global-set-key (kbd "M-r") 'sp-raise-sexp)
 ;; Buffers
 (normal-key "DEL" 'kill-this-buffer)
 (normal-key "<up>" 'buf-move-up)
 (normal-key "<down>" 'buf-move-down)
+(global-set-key (kbd "M-b") 'previous-buffer)
+(global-set-key (kbd "M-f") 'next-buffer)
 ;; Comments
 (evil-commentary-mode)
 ;; Drag stuff
 (drag-stuff-mode t)
 (normal-key "C-j" 'drag-stuff-down)
 (normal-key "C-k" 'drag-stuff-up)
-(define-key evil-visual-state-map (kbd "C-j") 'drag-stuff-down)
-(define-key evil-visual-state-map (kbd "C-k") 'drag-stuff-up)
+(visual-key "C-j" 'drag-stuff-down)
+(visual-key "C-k" 'drag-stuff-up)
 ;; Paste pop
 (normal-key "C-p" 'paste-pop)
 (normal-key "C-n" 'paste-pop-next)
 ;; nmap Y y$
 (normal-key "Y" 'copy-to-end-of-line)
 ;; Buffers
-(normal-key "C-l" 'evil-buffer)
+(global-set-key (kbd "C-l") 'evil-buffer)
+;; JSON
+(eval-after-load 'json-mode
+  '(define-key json-mode-map (kbd "C-c C-f") 'json-pretty-print-buffer))
 ;; Key chord
 (require 'key-chord)
 (key-chord-mode 1)
@@ -252,6 +300,9 @@
   "s" 'ensime-sbt)
 ;; Find function (elisp)
 (evil-leader/set-key-for-mode 'emacs-lisp-mode "j" 'find-function)
+;; Tern
+(evil-leader/set-key-for-mode 'js-mode "j" 'tern-find-definition)
+(evil-leader/set-key-for-mode 'js-mode "t" 'tern-get-type)
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -259,7 +310,7 @@
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (web-mode markdown-mode json-mode ace-jump-mode key-chord buffer-move drag-stuff paredit csharp-mode browse-kill-ring projectile fsharp-mode evil-args evil-commentary ack evil-surround evil-numbers smart-mode-line highlight-numbers evil-leader ido-vertical-mode flx-ido evil ensime undo-tree magit))))
+    (smex evil-smartparens smartparens company-tern json-mode github-browse-file web-mode markdown-mode ace-jump-mode key-chord buffer-move drag-stuff csharp-mode browse-kill-ring projectile fsharp-mode evil-args evil-commentary ack evil-surround evil-numbers smart-mode-line highlight-numbers evil-leader ido-vertical-mode flx-ido evil ensime undo-tree magit))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
