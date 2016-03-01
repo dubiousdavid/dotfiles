@@ -1,3 +1,13 @@
+(defun copy-function-definition (new old)
+  "Define NEW with the same function definition as OLD."
+  (fset new (symbol-function old)))
+;; Open recent files with IDO
+(defun ido-recentf-open ()
+  "Use `ido-completing-read' to \\[find-file] a recent file"
+  (interactive)
+  (if (find-file (ido-completing-read "Find recent file: " recentf-list))
+      (message "Opening file...")
+    (message "Aborting")))
 ;; Paste pop
 (defun paste-pop (count)
   "Pop the previous entry in the kill ring."
@@ -107,7 +117,10 @@
 (setq package-enable-at-startup nil)
 (package-initialize)
 ;; Smex
+(smex-initialize)
 (global-set-key (kbd "M-x") 'smex)
+;; No splash screen
+(setq inhibit-splash-screen t)
 ;; Manual mode selection
 (add-to-list 'auto-mode-alist '("\\.sc\\'" . scala-mode))
 (add-to-list 'auto-mode-alist '("\\.tern-project\\'" . json-mode))
@@ -167,8 +180,29 @@
 (add-hook 'prog-mode-hook 'highlight-numbers-mode)
 ;; Smart mode line
 (setq sml/no-confirm-load-theme t)
-(setq rm-blacklist '(" Undo-Tree" " yas" " s-/"))
+(setq rm-blacklist '(" Undo-Tree" " s-/" " es"))
 (sml/setup)
+;; Window number
+(require 'window-number)
+(window-number-mode 1)
+(window-number-meta-mode 1)
+;; Recent files
+(require 'recentf)
+(recentf-mode 1)
+(setq recentf-max-menu-items 50)
+(setq recentf-auto-cleanup 60)
+(setq recentf-exclude '("/\\.git/.*\\'" "/elpa/.*\\'" ".*\\.gz\\'"))
+(global-set-key (kbd "C-x C-r") 'ido-recentf-open)
+
+;; Keep recent files in sync across multiple emacs instances
+(copy-function-definition 'recentf-save-list* 'recentf-save-list)
+
+(defun recentf-save-list ()
+  (let ((current-list recentf-list))
+    (recentf-load-list)
+    (setq recentf-list (append current-list recentf-list))
+    (recentf-cleanup)
+    (recentf-save-list*)))
 ;; Ack
 (setq ack-command "ag ")
 ;; Mouse in terminal
@@ -236,12 +270,15 @@
   (kbd "{") 'evil-backward-section-begin
   (kbd "}") 'evil-forward-section-begin)
 (global-set-key (kbd "M-r") 'sp-raise-sexp)
-;; Buffers
+;; Buffers and windows
 (normal-key "DEL" 'kill-this-buffer)
-(normal-key "<up>" 'buf-move-up)
-(normal-key "<down>" 'buf-move-down)
-(global-set-key (kbd "M-b") 'previous-buffer)
 (global-set-key (kbd "M-f") 'next-buffer)
+(global-set-key (kbd "M-b") 'previous-buffer)
+(global-set-key (kbd "M-e") 'enlarge-window)
+(global-set-key (kbd "M-s") 'shrink-window)
+(global-set-key (kbd "M-g") 'delete-other-windows)
+(global-set-key (kbd "M-u") 'buf-move-up)
+(global-set-key (kbd "M-d") 'buf-move-down)
 ;; Comments
 (evil-commentary-mode)
 ;; Drag stuff
@@ -310,7 +347,7 @@
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (smex evil-smartparens smartparens company-tern json-mode github-browse-file web-mode markdown-mode ace-jump-mode key-chord buffer-move drag-stuff csharp-mode browse-kill-ring projectile fsharp-mode evil-args evil-commentary ack evil-surround evil-numbers smart-mode-line highlight-numbers evil-leader ido-vertical-mode flx-ido evil ensime undo-tree magit))))
+    (window-number clojure-mode smex evil-smartparens smartparens company-tern json-mode github-browse-file web-mode markdown-mode ace-jump-mode key-chord buffer-move drag-stuff csharp-mode browse-kill-ring projectile fsharp-mode evil-args evil-commentary ack evil-surround evil-numbers smart-mode-line highlight-numbers evil-leader ido-vertical-mode flx-ido evil ensime undo-tree magit))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
