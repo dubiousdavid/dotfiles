@@ -90,9 +90,6 @@
   (interactive)
   (tern-mode t)
   (company-mode t))
-;; Normal mode key chord
-(defmacro normal-key-chord (chord f)
-  `(key-chord-define evil-normal-state-map ,chord ,f))
 ;; Define keys for evil states
 (defmacro normal-key (keys f)
   `(define-key evil-normal-state-map (kbd ,keys) ,f))
@@ -242,12 +239,15 @@
 (global-evil-leader-mode)
 (evil-leader/set-leader ",")
 (evil-leader/set-key "f" 'projectile-find-file
+		     "o" 'fzf
                      "b" 'switch-to-buffer
                      "g" 'magit-status
                      "h" 'github-browse-file
                      "d" 'duplicate-line-or-region
 		     "a" 'ack-from-root
-		     "u" 'undo-tree-visualize)
+		     "u" 'undo-tree-visualize
+		     "w" 'evil-ace-jump-word-mode
+		     "c" 'evil-ace-jump-char-mode)
 ;; Args
 (require 'evil-args)
 (define-key evil-inner-text-objects-map "a" 'evil-inner-arg)
@@ -272,13 +272,22 @@
 (global-set-key (kbd "M-r") 'sp-raise-sexp)
 ;; Buffers and windows
 (normal-key "DEL" 'kill-this-buffer)
+;; Forward buffer
 (global-set-key (kbd "M-f") 'next-buffer)
+;; Back buffer
 (global-set-key (kbd "M-b") 'previous-buffer)
+;; Enlarge window
 (global-set-key (kbd "M-e") 'enlarge-window)
+;; Shrink window
 (global-set-key (kbd "M-s") 'shrink-window)
+;; Grow window
 (global-set-key (kbd "M-g") 'delete-other-windows)
+;; Move buffer up
 (global-set-key (kbd "M-u") 'buf-move-up)
+;; Move buffer down
 (global-set-key (kbd "M-d") 'buf-move-down)
+;; Close buffer
+(global-set-key (kbd "M-c") 'kill-this-buffer)
 ;; Comments
 (evil-commentary-mode)
 ;; Drag stuff
@@ -297,13 +306,6 @@
 ;; JSON
 (eval-after-load 'json-mode
   '(define-key json-mode-map (kbd "C-c C-f") 'json-pretty-print-buffer))
-;; Key chord
-(require 'key-chord)
-(key-chord-mode 1)
-;; Ace jump
-(normal-key-chord "mw" 'evil-ace-jump-word-mode)
-(normal-key-chord "ml" 'evil-ace-jump-line-mode)
-(normal-key-chord "mc" 'evil-ace-jump-char-mode)
 ;; Easy motion
 ;; (evilem-default-keybindings "[")
 ;; (setq avy-keys (append (number-sequence ?a ?z) (number-sequence ?A ?Z)))
@@ -340,6 +342,8 @@
 ;; Tern
 (evil-leader/set-key-for-mode 'js-mode "j" 'tern-find-definition)
 (evil-leader/set-key-for-mode 'js-mode "t" 'tern-get-type)
+;; Markdown
+(evil-leader/set-key-for-mode 'markdown-mode "t" 'tidy-markdown)
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -347,7 +351,7 @@
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (window-number clojure-mode smex evil-smartparens smartparens company-tern json-mode github-browse-file web-mode markdown-mode ace-jump-mode key-chord buffer-move drag-stuff csharp-mode browse-kill-ring projectile fsharp-mode evil-args evil-commentary ack evil-surround evil-numbers smart-mode-line highlight-numbers evil-leader ido-vertical-mode flx-ido evil ensime undo-tree magit))))
+    (fzf window-number clojure-mode smex evil-smartparens smartparens company-tern json-mode github-browse-file web-mode markdown-mode ace-jump-mode buffer-move drag-stuff csharp-mode browse-kill-ring projectile fsharp-mode evil-args evil-commentary ack evil-surround evil-numbers smart-mode-line highlight-numbers evil-leader ido-vertical-mode flx-ido evil ensime undo-tree magit))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
