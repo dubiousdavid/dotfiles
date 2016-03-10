@@ -80,13 +80,14 @@
   (evil-yank (point) (point-at-eol)))
 ;; Magit
 (defun magit-status-window ()
+  (interactive)
   (magit-status)
   (delete-other-windows))
 ;; Load local file
 (defun load-local (f)
   (load-file (concat user-emacs-directory f)))
 ;; Tern
-(defun start-tern ()
+(defun tern-start ()
   (interactive)
   (tern-mode t)
   (company-mode t))
@@ -131,6 +132,14 @@
 ;; Smartparens
 (require 'smartparens-config)
 (add-hook 'prog-mode-hook 'smartparens-mode)
+(sp-with-modes '(elixir-mode)
+  (sp-local-pair "fn" "end"
+         :when '(("SPC" "RET"))
+         :actions '(insert navigate))
+  (sp-local-pair "do" "end"
+         :when '(("SPC" "RET"))
+         :post-handlers '(sp-ruby-def-post-handler)
+         :actions '(insert navigate)))
 ;; Emacs lisp mode
 (add-hook 'emacs-lisp-mode-hook 'prettify-symbols-mode)
 (add-hook 'emacs-lisp-mode-hook 'smartparens-strict-mode)
@@ -158,6 +167,7 @@
 (ido-everywhere 1)
 (flx-ido-mode 1)
 (ido-vertical-mode 1)
+(setq ido-auto-merge-work-directories-length -1)
 (setq ido-vertical-show-count t)
 (setq ido-vertical-define-keys 'C-n-C-p-up-and-down)
 (setq ido-enable-flex-matching t)
@@ -224,12 +234,34 @@
 (add-to-list 'auto-mode-alist '("\\.md\\.erb\\'" . markdown-mode))
 (eval-after-load 'markdown-mode '(setq markdown-open-command "~/bin/mark"))
 ;; Evil mode
+(defface evil-normal-tag
+  `((t (:foreground "#dfff00"))) ; Yellow
+  "Evil normal mode indicator face")
+(defface evil-insert-tag
+  `((t (:foreground "#005fff"))) ; Blue
+  "Evil insert mode indicator face")
+(defface evil-visual-tag
+  `((t (:foreground "#c82829"))) ; Red
+  "Evil visual mode indicator face")
+(defface evil-motion-tag
+  `((t (:foreground "pink"))) ; Pink
+  "Evil motion mode indicator face")
+(defface evil-emacs-tag
+  `((t (:weight bold :foreground "purple"))) ; Purple
+  "Evil emacs mode indicator face")
+(setq evil-normal-state-tag (propertize " NORMAL" 'face 'evil-normal-tag))
+(setq evil-insert-state-tag (propertize " INSERT" 'face 'evil-insert-tag))
+(setq evil-visual-state-tag (propertize " VISUAL" 'face 'evil-visual-tag))
+(setq evil-motion-state-tag (propertize " MOTION" 'face 'evil-motion-tag))
+(setq evil-emacs-state-tag (propertize " EMACS" 'face 'evil-emacs-tag))
+
 (setq evil-want-C-u-scroll t)
 (setq evil-shift-width 2)
 (setq evil-regexp-search nil)
 (evil-mode 1)
 (load-local "evil-sexp.el")
 (evil-set-initial-state 'fundamental-mode 'emacs)
+(add-hook 'git-commit-mode-hook 'evil-insert-state)
 (evil-set-initial-state 'ensime-inspector-mode 'motion)
 (evil-set-initial-state 'sbt-mode 'insert)
 (evil-set-initial-state 'ack-mode 'motion)
@@ -241,7 +273,7 @@
 (evil-leader/set-key "f" 'projectile-find-file
 		     "o" 'fzf
                      "b" 'switch-to-buffer
-                     "g" 'magit-status
+                     "g" 'magit-status-window
                      "h" 'github-browse-file
                      "d" 'duplicate-line-or-region
 		     "a" 'ack-from-root
@@ -351,7 +383,7 @@
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (fzf window-number clojure-mode smex evil-smartparens smartparens company-tern json-mode github-browse-file web-mode markdown-mode ace-jump-mode buffer-move drag-stuff csharp-mode browse-kill-ring projectile fsharp-mode evil-args evil-commentary ack evil-surround evil-numbers smart-mode-line highlight-numbers evil-leader ido-vertical-mode flx-ido evil ensime undo-tree magit))))
+    (elixir-mode fzf window-number clojure-mode smex evil-smartparens smartparens company-tern json-mode github-browse-file web-mode markdown-mode ace-jump-mode buffer-move drag-stuff csharp-mode browse-kill-ring projectile fsharp-mode evil-args evil-commentary ack evil-surround evil-numbers smart-mode-line highlight-numbers evil-leader ido-vertical-mode flx-ido evil ensime undo-tree magit))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
