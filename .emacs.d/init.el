@@ -193,6 +193,9 @@
 (require 'window-number)
 (window-number-mode 1)
 (window-number-meta-mode 1)
+;; Rainbow delimiters
+(require 'rainbow-delimiters)
+(add-hook 'prog-mode-hook 'rainbow-delimiters-mode)
 ;; Recent files
 (require 'recentf)
 (recentf-mode 1)
@@ -244,20 +247,20 @@
   `((t (:foreground "#c82829"))) ; Red
   "Evil visual mode indicator face")
 (defface evil-motion-tag
-  `((t (:foreground "pink"))) ; Pink
+  `((t (:foreground "#FF73FD"))) ; Pink
   "Evil motion mode indicator face")
 (defface evil-emacs-tag
-  `((t (:weight bold :foreground "purple"))) ; Purple
+  `((t (:weight bold :foreground "gray50"))) ; Gray
   "Evil emacs mode indicator face")
 (setq evil-normal-state-tag (propertize " NORMAL" 'face 'evil-normal-tag))
 (setq evil-insert-state-tag (propertize " INSERT" 'face 'evil-insert-tag))
 (setq evil-visual-state-tag (propertize " VISUAL" 'face 'evil-visual-tag))
 (setq evil-motion-state-tag (propertize " MOTION" 'face 'evil-motion-tag))
 (setq evil-emacs-state-tag (propertize " EMACS" 'face 'evil-emacs-tag))
-
 (setq evil-want-C-u-scroll t)
 (setq evil-shift-width 2)
 (setq evil-regexp-search nil)
+(require 'evil)
 (evil-mode 1)
 (load-local "evil-sexp.el")
 (evil-set-initial-state 'fundamental-mode 'emacs)
@@ -338,10 +341,6 @@
 ;; JSON
 (eval-after-load 'json-mode
   '(define-key json-mode-map (kbd "C-c C-f") 'json-pretty-print-buffer))
-;; Easy motion
-;; (evilem-default-keybindings "[")
-;; (setq avy-keys (append (number-sequence ?a ?z) (number-sequence ?A ?Z)))
-;; (setq avy-background t)
 ;; Surround
 (require 'evil-surround)
 (global-evil-surround-mode 1)
@@ -383,10 +382,19 @@
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (elixir-mode fzf window-number clojure-mode smex evil-smartparens smartparens company-tern json-mode github-browse-file web-mode markdown-mode ace-jump-mode buffer-move drag-stuff csharp-mode browse-kill-ring projectile fsharp-mode evil-args evil-commentary ack evil-surround evil-numbers smart-mode-line highlight-numbers evil-leader ido-vertical-mode flx-ido evil ensime undo-tree magit))))
+    (rainbow-delimiters elixir-mode fzf window-number clojure-mode smex evil-smartparens smartparens company-tern json-mode github-browse-file web-mode markdown-mode ace-jump-mode buffer-move drag-stuff csharp-mode browse-kill-ring projectile fsharp-mode evil-args evil-commentary ack evil-surround evil-numbers smart-mode-line highlight-numbers evil-leader ido-vertical-mode flx-ido evil ensime undo-tree magit))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- )
+ '(rainbow-delimiters-depth-1-face ((t (:foreground "grey55"))))
+ '(rainbow-delimiters-depth-2-face ((t (:foreground "#b0b1a3"))))
+ '(rainbow-delimiters-depth-3-face ((t (:foreground "grey55"))))
+ '(rainbow-delimiters-depth-4-face ((t (:foreground "#b0b1a3"))))
+ '(rainbow-delimiters-depth-5-face ((t (:foreground "grey55"))))
+ '(rainbow-delimiters-depth-6-face ((t (:foreground "#b0b1a3"))))
+ '(rainbow-delimiters-depth-7-face ((t (:foreground "grey55"))))
+ '(rainbow-delimiters-depth-8-face ((t (:foreground "#b0b1a3"))))
+ '(rainbow-delimiters-depth-9-face ((t (:foreground "grey55"))))
+ '(sml/position-percentage ((t (:foreground "gray50" :weight normal)))))
