@@ -1,3 +1,28 @@
+(defmacro make-motion (name fun)
+  `(evil-define-motion ,name (count)
+     :type inclusive
+     (dotimes (i (or count 1))
+       (,fun))))
+
+(defun smart-open-line-above ()
+  "Insert an empty line above the current line.
+  Position the cursor at it's beginning, according to the current mode."
+  (interactive)
+  (move-beginning-of-line nil)
+  (newline-and-indent)
+  (forward-line -1)
+  (indent-according-to-mode))
+
+(defun smart-open-line (arg)
+  "Insert an empty line after the current line.
+  Position the cursor at its beginning, according to the current mode.
+  With a prefix ARG open line above the current line."
+  (interactive "P")
+  (if arg
+      (prelude-smart-open-line-above)
+    (progn
+      (move-end-of-line nil)
+      (newline-and-indent))))
 (defun copy-function-definition (new old)
   "Define NEW with the same function definition as OLD."
   (fset new (symbol-function old)))
@@ -151,7 +176,7 @@
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
 ;; Company
 (global-set-key (kbd "C-x C-o") 'company-complete)
-(eval-after-load 'company '(add-to-list 'company-backends 'company-tern))
+(with-eval-after-load 'company (add-to-list 'company-backends 'company-tern))
 ;; Disable menu bar
 (menu-bar-mode -1)
 ;; No bell
@@ -187,7 +212,7 @@
 (add-hook 'prog-mode-hook 'highlight-numbers-mode)
 ;; Smart mode line
 (setq sml/no-confirm-load-theme t)
-(setq rm-blacklist '(" Undo-Tree" " s-/" " es"))
+(setq rm-blacklist '(" Undo-Tree" " s-/" " es" " yas" " Anzu"))
 (sml/setup)
 ;; Window number
 (require 'window-number)
@@ -235,7 +260,7 @@
 ;; Markdown mode
 (add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
 (add-to-list 'auto-mode-alist '("\\.md\\.erb\\'" . markdown-mode))
-(eval-after-load 'markdown-mode '(setq markdown-open-command "~/bin/mark"))
+(with-eval-after-load 'markdown-mode (setq markdown-open-command "~/bin/mark"))
 ;; Evil mode
 (defface evil-normal-tag
   `((t (:foreground "#dfff00"))) ; Yellow
@@ -253,16 +278,20 @@
   `((t (:weight bold :foreground "gray50"))) ; Gray
   "Evil emacs mode indicator face")
 (setq evil-normal-state-tag (propertize " NORMAL" 'face 'evil-normal-tag))
+(setq evil-operator-state-tag (propertize " NORMAL" 'face 'evil-normal-tag))
 (setq evil-insert-state-tag (propertize " INSERT" 'face 'evil-insert-tag))
+(setq evil-replace-state-tag (propertize " REPLACE" 'face 'evil-insert-tag))
 (setq evil-visual-state-tag (propertize " VISUAL" 'face 'evil-visual-tag))
 (setq evil-motion-state-tag (propertize " MOTION" 'face 'evil-motion-tag))
 (setq evil-emacs-state-tag (propertize " EMACS" 'face 'evil-emacs-tag))
 (setq evil-want-C-u-scroll t)
 (setq evil-shift-width 2)
 (setq evil-regexp-search nil)
+(setq evil-move-cursor-back nil)
 (require 'evil)
 (evil-mode 1)
-(load-local "evil-sexp.el")
+(make-motion evil-forward-sexp sp-next-sexp)
+(make-motion evil-backward-sexp sp-backward-sexp)
 (evil-set-initial-state 'fundamental-mode 'emacs)
 (add-hook 'git-commit-mode-hook 'evil-insert-state)
 (evil-set-initial-state 'ensime-inspector-mode 'motion)
@@ -274,7 +303,8 @@
 (global-evil-leader-mode)
 (evil-leader/set-leader ",")
 (evil-leader/set-key "f" 'projectile-find-file
-		     "o" 'fzf
+		     "o" 'smart-open-line
+		     "O" 'smart-open-line-above
                      "b" 'switch-to-buffer
                      "g" 'magit-status-window
                      "h" 'github-browse-file
@@ -305,6 +335,7 @@
   (kbd "{") 'evil-backward-section-begin
   (kbd "}") 'evil-forward-section-begin)
 (global-set-key (kbd "M-r") 'sp-raise-sexp)
+(global-set-key (kbd "C-a") 'beginning-of-defun)
 ;; Buffers and windows
 (normal-key "DEL" 'kill-this-buffer)
 ;; Forward buffer
@@ -325,6 +356,10 @@
 (global-set-key (kbd "M-c") 'kill-this-buffer)
 ;; Comments
 (evil-commentary-mode)
+;; Anzu
+(with-eval-after-load 'evil
+  (require 'evil-anzu)
+  (global-anzu-mode 1))
 ;; Drag stuff
 (drag-stuff-mode t)
 (normal-key "C-j" 'drag-stuff-down)
@@ -339,20 +374,35 @@
 ;; Buffers
 (global-set-key (kbd "C-l") 'evil-buffer)
 ;; JSON
-(eval-after-load 'json-mode
-  '(define-key json-mode-map (kbd "C-c C-f") 'json-pretty-print-buffer))
+(with-eval-after-load 'json-mode
+  (define-key json-mode-map (kbd "C-c C-f") 'json-pretty-print-buffer))
+;; Clojure
+(add-hook 'clojure-mode-hook 'prettify-symbols-mode)
+(add-hook 'clojure-mode-hook 'smartparens-strict-mode)
+(add-hook 'clojure-mode-hook 'evil-smartparens-mode)
+(with-eval-after-load 'clojure-mode
+  (make-motion evil-forward-sexp-clojure clojure-forward-logical-sexp)
+  (make-motion evil-backward-sexp-clojure clojure-backward-logical-sexp)
+  (evil-define-key 'motion clojure-mode-map
+    (kbd "(") 'evil-backward-sexp-clojure
+    (kbd ")") 'evil-forward-sexp-clojure)
+  (evil-define-key 'visual clojure-mode-map
+    (kbd "(") 'evil-backward-sexp-clojure
+    (kbd ")") 'evil-forward-sexp-clojure)
+  (evil-define-key 'motion clojure-mode-map
+    (kbd "{") 'evil-backward-section-begin
+    (kbd "}") 'evil-forward-section-begin)
+  (evil-define-key 'visual clojure-mode-map
+    (kbd "{") 'evil-backward-section-begin
+    (kbd "}") 'evil-forward-section-begin))
 ;; Surround
 (require 'evil-surround)
 (global-evil-surround-mode 1)
-;; Inc/dec numbers
-(require 'evil-numbers)
-(normal-key "C-a" 'evil-numbers/inc-at-pt)
-(normal-key "C-s" 'evil-numbers/dec-at-pt)
 ;; Split and focus
 (normal-key "_" (split-and-focus split-window-vertically))
 (normal-key "|" (split-and-focus split-window-horizontally))
 ;; Ensime
-(eval-after-load 'ensime '(setq ensime-sem-high-enabled-p nil))
+(with-eval-after-load 'ensime (setq ensime-sem-high-enabled-p nil))
 (evil-leader/set-key-for-mode 'scala-mode
   ;; Inspect type
   "i" 'ensime-inspect-type-at-point
@@ -364,10 +414,15 @@
   "j" 'ensime-edit-definition
   ;; Expand selection
   "." 'ensime-expand-selection-command
-  ;; Lookup type
-  "l" 'ensime-search
+  ;; Lookup symbol in docs
+  "l" 'ensime-show-doc-for-symbol-at-point
+  ;; Type at point
+  "t" 'ensime-type-at-point
   ;; SBT
-  "s" 'ensime-sbt)
+  "s" 'ensime-inf-switch)
+;; Format scala source
+(add-hook 'scala-mode-hook
+  (lambda () (define-key scala-mode-map (kbd "C-c C-f") 'ensime-format-source)))
 ;; Find function (elisp)
 (evil-leader/set-key-for-mode 'emacs-lisp-mode "j" 'find-function)
 ;; Tern
@@ -382,7 +437,7 @@
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (rainbow-delimiters elixir-mode fzf window-number clojure-mode smex evil-smartparens smartparens company-tern json-mode github-browse-file web-mode markdown-mode ace-jump-mode buffer-move drag-stuff csharp-mode browse-kill-ring projectile fsharp-mode evil-args evil-commentary ack evil-surround evil-numbers smart-mode-line highlight-numbers evil-leader ido-vertical-mode flx-ido evil ensime undo-tree magit))))
+    (evil-anzu rainbow-delimiters elixir-mode fzf window-number clojure-mode smex evil-smartparens smartparens company-tern json-mode github-browse-file web-mode markdown-mode ace-jump-mode buffer-move drag-stuff csharp-mode browse-kill-ring projectile fsharp-mode evil-args evil-commentary ack evil-surround smart-mode-line highlight-numbers evil-leader ido-vertical-mode flx-ido evil ensime undo-tree magit))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
