@@ -54,7 +54,8 @@ plugins=(git)
 
 # User configuration
 
-export PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Users/dsargeant/bin:/usr/local/sbin"
+export PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Users/dsargeant/bin:/usr/local/sbin:/usr/local/go/bin"
+# Rust: /Users/dsargeant/.cargo/bin
 # export MANPATH="/usr/local/man:$MANPATH"
 
 source $ZSH/oh-my-zsh.sh
@@ -101,8 +102,18 @@ function groot {
  }
 
 export BROWSER="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
-alias magit="emacs --load='~/.emacs.d/magit-init.el' --no-splash"
+alias magit="emacs -nw --load='~/.emacs.d/magit-init.el' --no-splash"
 alias v=nvim
-alias e=emacs
+alias e="emacs -nw"
 export MANPAGER="vim -c MANPAGER -"
 export PAGER="vim -c PAGER -"
+export PYTHONPATH="/Library/Python/2.7/site-packages:$PYTHONPATH"
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+source /usr/local/share/zsh/site-functions/_aws
+export FZF_DEFAULT_COMMAND="ag -U --hidden -g ''"
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+export RUST_SRC_PATH="/Users/dsargeant/Projects/rustc-1.8.0/src"
+export GOPATH=$HOME/Go
+export PATH=$PATH:$GOPATH/bin
+# Artifact authentication
+source ~/.boomtown

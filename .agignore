@@ -8,4 +8,4 @@ Thumbs.db
 .ensime
 .ensime_cache
 *.iml
-.agignore
+.git

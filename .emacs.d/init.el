@@ -136,6 +136,8 @@
       '(("gnu" . "http://elpa.gnu.org/packages/")
         ("marmalade" . "http://marmalade-repo.org/packages/")
         ("melpa" . "http://melpa.milkbox.net/packages/")))
+;; Pin packages
+;; (add-to-list 'package-pinned-packages '(cider . "melpa-stable") t)
 ;; Initialize packages
 (setq package-enable-at-startup nil)
 (package-initialize)
@@ -150,6 +152,7 @@
 ;; Line numbers
 (global-linum-mode t)
 (setq linum-format "%4d ")
+
 ;; Auto close brackets
 ;; (electric-pair-mode 1)
 ;; Highlight matching bracket
@@ -176,7 +179,10 @@
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
 ;; Company
 (global-set-key (kbd "C-x C-o") 'company-complete)
+(global-set-key (kbd "TAB") #'company-indent-or-complete-common)
+(setq company-tooltip-align-annotations t)
 (with-eval-after-load 'company (add-to-list 'company-backends 'company-tern))
+(add-hook 'racer-mode-hook #'company-mode)
 ;; Disable menu bar
 (menu-bar-mode -1)
 ;; No bell
@@ -212,7 +218,7 @@
 (add-hook 'prog-mode-hook 'highlight-numbers-mode)
 ;; Smart mode line
 (setq sml/no-confirm-load-theme t)
-(setq rm-blacklist '(" Undo-Tree" " s-/" " es" " yas" " Anzu"))
+(setq rm-blacklist '(" Undo-Tree" " s-/" " es" " yas" " Anzu" " Isearch"))
 (sml/setup)
 ;; Window number
 (require 'window-number)
@@ -261,6 +267,8 @@
 (add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
 (add-to-list 'auto-mode-alist '("\\.md\\.erb\\'" . markdown-mode))
 (with-eval-after-load 'markdown-mode (setq markdown-open-command "~/bin/mark"))
+;; FZF
+(load-local "fzf.el")
 ;; Evil mode
 (defface evil-normal-tag
   `((t (:foreground "#dfff00"))) ; Yellow
@@ -302,7 +310,7 @@
 ;; Leader
 (global-evil-leader-mode)
 (evil-leader/set-leader ",")
-(evil-leader/set-key "f" 'projectile-find-file
+(evil-leader/set-key "f" 'fzf
 		     "o" 'smart-open-line
 		     "O" 'smart-open-line-above
                      "b" 'switch-to-buffer
@@ -376,11 +384,23 @@
 ;; JSON
 (with-eval-after-load 'json-mode
   (define-key json-mode-map (kbd "C-c C-f") 'json-pretty-print-buffer))
+;; Surround
+(require 'evil-surround)
+(global-evil-surround-mode 1)
+;; Split and focus
+(normal-key "_" (split-and-focus split-window-vertically))
+(normal-key "|" (split-and-focus split-window-horizontally))
+;; Rust
+(setq racer-cmd "/Users/dsargeant/.cargo/bin/racer")
+(setq racer-rust-src-path "/Users/dsargeant/Projects/rustc-1.8.0/src")
+(add-hook 'rust-mode-hook #'racer-mode)
+(add-hook 'racer-mode-hook #'eldoc-mode)
 ;; Clojure
 (add-hook 'clojure-mode-hook 'prettify-symbols-mode)
 (add-hook 'clojure-mode-hook 'smartparens-strict-mode)
 (add-hook 'clojure-mode-hook 'evil-smartparens-mode)
 (with-eval-after-load 'clojure-mode
+  (load-local "clojure.el")
   (make-motion evil-forward-sexp-clojure clojure-forward-logical-sexp)
   (make-motion evil-backward-sexp-clojure clojure-backward-logical-sexp)
   (evil-define-key 'motion clojure-mode-map
@@ -389,20 +409,22 @@
   (evil-define-key 'visual clojure-mode-map
     (kbd "(") 'evil-backward-sexp-clojure
     (kbd ")") 'evil-forward-sexp-clojure)
-  (evil-define-key 'motion clojure-mode-map
-    (kbd "{") 'evil-backward-section-begin
-    (kbd "}") 'evil-forward-section-begin)
-  (evil-define-key 'visual clojure-mode-map
-    (kbd "{") 'evil-backward-section-begin
-    (kbd "}") 'evil-forward-section-begin))
-;; Surround
-(require 'evil-surround)
-(global-evil-surround-mode 1)
-;; Split and focus
-(normal-key "_" (split-and-focus split-window-vertically))
-(normal-key "|" (split-and-focus split-window-horizontally))
+  ;; (normal-key "{" 'sp-backward-up-sexp)
+  ;; (normal-key "}" 'sp-down-sexp)
+  ;; (visual-key "{" 'sp-backward-up-sexp)
+  ;; (visual-key "}" 'sp-down-sexp)
+  )
+(evil-leader/set-key-for-mode 'clojure-mode
+  "r" 'sp-raise-sexp
+  "s" 'sp-split-sexp
+  ")" 'sp-forward-slurp-sexp
+  "}" 'sp-forward-barf-sexp
+  "(" 'sp-backward-slurp-sexp
+  "{" 'sp-backward-barf-sexp)
 ;; Ensime
-(with-eval-after-load 'ensime (setq ensime-sem-high-enabled-p nil))
+(with-eval-after-load 'ensime
+  (setq ensime-sem-high-enabled-p nil)
+  (setq ensime-left-margin-gutter nil))
 (evil-leader/set-key-for-mode 'scala-mode
   ;; Inspect type
   "i" 'ensime-inspect-type-at-point
@@ -410,6 +432,8 @@
   "e" 'ensime-show-all-errors-and-warnings
   ;; References of symbol
   "r" 'ensime-show-uses-of-symbol-at-point
+  ;; Rename variable
+  "n" 'ensime-refactor-diff-rename
   ;; Jump to definition
   "j" 'ensime-edit-definition
   ;; Expand selection
@@ -428,8 +452,16 @@
 ;; Tern
 (evil-leader/set-key-for-mode 'js-mode "j" 'tern-find-definition)
 (evil-leader/set-key-for-mode 'js-mode "t" 'tern-get-type)
-;; Markdown
-(evil-leader/set-key-for-mode 'markdown-mode "t" 'tidy-markdown)
+;; Format markdown (tidy)
+(add-hook 'markdown-mode-hook
+  (lambda () (define-key markdown-mode-map (kbd "C-c C-f") 'tidy-markdown)))
+;; Go
+(add-hook 'go-mode-hook
+  (lambda ()
+    (setq-default)
+    (setq tab-width 2)
+    (setq standard-indent 2)
+    (setq indent-tabs-mode nil)))
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -437,7 +469,7 @@
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (evil-anzu rainbow-delimiters elixir-mode fzf window-number clojure-mode smex evil-smartparens smartparens company-tern json-mode github-browse-file web-mode markdown-mode ace-jump-mode buffer-move drag-stuff csharp-mode browse-kill-ring projectile fsharp-mode evil-args evil-commentary ack evil-surround smart-mode-line highlight-numbers evil-leader ido-vertical-mode flx-ido evil ensime undo-tree magit))))
+    (go-mode toml-mode racer evil-anzu rainbow-delimiters elixir-mode window-number clojure-mode smex evil-smartparens smartparens company-tern json-mode github-browse-file web-mode markdown-mode ace-jump-mode buffer-move drag-stuff csharp-mode browse-kill-ring projectile fsharp-mode evil-args evil-commentary ack evil-surround smart-mode-line highlight-numbers evil-leader ido-vertical-mode flx-ido evil ensime undo-tree magit))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
