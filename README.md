@@ -5,5 +5,5 @@
 * zshrc
 * Git
 * Leiningen
-* Ack
+* Ack/Ag
 * Tmux
