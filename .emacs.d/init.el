@@ -1,3 +1,13 @@
+(defun toggle-evil (mode)
+  (if mode
+      (evil-emacs-state 1)
+    (evil-normal-state 1)))
+
+(defun show-file-name ()
+  "Show the full path file name in the minibuffer."
+  (interactive)
+  (message (buffer-file-name)))
+
 (defmacro make-motion (name fun)
   `(evil-define-motion ,name (count)
      :type inclusive
@@ -18,11 +28,8 @@
   Position the cursor at its beginning, according to the current mode.
   With a prefix ARG open line above the current line."
   (interactive "P")
-  (if arg
-      (prelude-smart-open-line-above)
-    (progn
-      (move-end-of-line nil)
-      (newline-and-indent))))
+  (move-end-of-line nil)
+  (newline-and-indent))
 (defun copy-function-definition (new old)
   "Define NEW with the same function definition as OLD."
   (fset new (symbol-function old)))
@@ -131,16 +138,22 @@
      (interactive)
      (,f)
      (other-window 1)))
-;; Use these package archives
-(setq package-archives
-      '(("gnu" . "http://elpa.gnu.org/packages/")
-        ("marmalade" . "http://marmalade-repo.org/packages/")
-        ("melpa" . "http://melpa.milkbox.net/packages/")))
-;; Pin packages
-;; (add-to-list 'package-pinned-packages '(cider . "melpa-stable") t)
 ;; Initialize packages
-(setq package-enable-at-startup nil)
+(require 'package)
+(setq package-enable-at-startup nil) ; To prevent initialising twice
+(add-to-list 'package-archives '("melpa" . "https://stable.melpa.org/packages/"))
+(add-to-list 'package-archives '("melpa-stable" . "http://melpa-stable.milkbox.net/packages/"))
+(add-to-list 'package-archives '("gnu" . "http://elpa.gnu.org/packages/"))
+(add-to-list 'package-archives '("marmalade" . "http://marmalade-repo.org/packages/"))
 (package-initialize)
+
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
+(eval-when-compile
+  (require 'use-package))
+;; Pin packages
+(use-package ensime :pin melpa-stable)
 ;; Smex
 (smex-initialize)
 (global-set-key (kbd "M-x") 'smex)
@@ -148,7 +161,11 @@
 (setq inhibit-splash-screen t)
 ;; Manual mode selection
 (add-to-list 'auto-mode-alist '("\\.sc\\'" . scala-mode))
-(add-to-list 'auto-mode-alist '("\\.tern-project\\'" . json-mode))
+(add-to-list 'auto-mode-alist '("\\.agignore\\'" . gitignore-mode))
+(add-to-list 'auto-mode-alist '("\\.tern-project\\'" . js-mode))
+(add-to-list 'auto-mode-alist '("\\.ackrc\\'" . conf-unix-mode))
+(add-to-list 'auto-mode-alist '("\\.zshrc\\'" . sh-mode))
+(add-to-list 'auto-mode-alist '("\\.plist\\'" . xml-mode))
 ;; Line numbers
 (global-linum-mode t)
 (setq linum-format "%4d ")
@@ -183,6 +200,8 @@
 (setq company-tooltip-align-annotations t)
 (with-eval-after-load 'company (add-to-list 'company-backends 'company-tern))
 (add-hook 'racer-mode-hook #'company-mode)
+(add-hook 'cider-repl-mode-hook #'company-mode)
+(add-hook 'cider-mode-hook #'company-mode)
 ;; Disable menu bar
 (menu-bar-mode -1)
 ;; No bell
@@ -216,6 +235,7 @@
 (load-local "atom-dark-theme.el")
 ;; Highlight numbers
 (add-hook 'prog-mode-hook 'highlight-numbers-mode)
+(add-hook 'json-mode-hook (lambda () (highlight-numbers-mode -1)))
 ;; Smart mode line
 (setq sml/no-confirm-load-theme t)
 (setq rm-blacklist '(" Undo-Tree" " s-/" " es" " yas" " Anzu" " Isearch"))
@@ -246,13 +266,6 @@
     (recentf-save-list*)))
 ;; Ack
 (setq ack-command "ag ")
-;; Mouse in terminal
-(xterm-mouse-mode 1)
-;; Mouse yank
-(setq mouse-yank-at-point t)
-;; Enable scrolling
-(global-set-key [mouse-4] (lambda () (interactive) (scroll-down 1)))
-(global-set-key [mouse-5] (lambda () (interactive) (scroll-up 1)))
 ;; Input method
 (setq default-input-method "MacOSX")
 ;; Make cut and paste work with the OS X clipboard
@@ -298,6 +311,8 @@
 (setq evil-move-cursor-back nil)
 (require 'evil)
 (evil-mode 1)
+(insert-key "C-p" 'previous-line)
+(insert-key "C-n" 'next-line)
 (make-motion evil-forward-sexp sp-next-sexp)
 (make-motion evil-backward-sexp sp-backward-sexp)
 (evil-set-initial-state 'fundamental-mode 'emacs)
@@ -306,7 +321,10 @@
 (evil-set-initial-state 'sbt-mode 'insert)
 (evil-set-initial-state 'ack-mode 'motion)
 (evil-set-initial-state 'dired-mode 'emacs)
+(evil-set-initial-state 'cider-docview-mode 'motion)
+(evil-set-initial-state 'cider-repl-mode 'insert)
 (evil-declare-change-repeat 'company-complete)
+(add-hook 'magit-blame-mode-hook (lambda () (toggle-evil magit-blame-mode)))
 ;; Leader
 (global-evil-leader-mode)
 (evil-leader/set-leader ",")
@@ -314,13 +332,20 @@
 		     "o" 'smart-open-line
 		     "O" 'smart-open-line-above
                      "b" 'switch-to-buffer
-                     "g" 'magit-status-window
-                     "h" 'github-browse-file
                      "d" 'duplicate-line-or-region
 		     "a" 'ack-from-root
+		     "n" 'show-file-name
 		     "u" 'undo-tree-visualize
 		     "w" 'evil-ace-jump-word-mode
-		     "c" 'evil-ace-jump-char-mode)
+		     "c" 'evil-ace-jump-char-mode
+		     ;; Git
+                     "gs" 'magit-status-window
+                     "gh" 'github-browse-file
+		     "gb" 'magit-blame
+		     "gl" 'magit-log-buffer-file)
+;; Dumb jump
+(dumb-jump-mode)
+(normal-key "gj" 'dumb-jump-go)
 ;; Args
 (require 'evil-args)
 (define-key evil-inner-text-objects-map "a" 'evil-inner-arg)
@@ -379,11 +404,11 @@
 (normal-key "C-n" 'paste-pop-next)
 ;; nmap Y y$
 (normal-key "Y" 'copy-to-end-of-line)
+(motion-key "Y" 'copy-to-end-of-line)
 ;; Buffers
 (global-set-key (kbd "C-l") 'evil-buffer)
 ;; JSON
-(with-eval-after-load 'json-mode
-  (define-key json-mode-map (kbd "C-c C-f") 'json-pretty-print-buffer))
+(load-local "json-mode.el")
 ;; Surround
 (require 'evil-surround)
 (global-evil-surround-mode 1)
@@ -409,18 +434,26 @@
   (evil-define-key 'visual clojure-mode-map
     (kbd "(") 'evil-backward-sexp-clojure
     (kbd ")") 'evil-forward-sexp-clojure)
-  ;; (normal-key "{" 'sp-backward-up-sexp)
-  ;; (normal-key "}" 'sp-down-sexp)
-  ;; (visual-key "{" 'sp-backward-up-sexp)
-  ;; (visual-key "}" 'sp-down-sexp)
-  )
+  (define-key clojure-mode-map (kbd "M-)") 'sp-forward-slurp-sexp)
+  (define-key clojure-mode-map (kbd "M-}") 'sp-forward-barf-sexp)
+  (define-key clojure-mode-map (kbd "M-(") 'sp-backward-slurp-sexp)
+  (define-key clojure-mode-map (kbd "M-{") 'sp-backward-barf-sexp)
+  (setq cider-repl-use-pretty-printing t)
+  (normal-key "{" 'sp-backward-up-sexp)
+  (normal-key "}" 'sp-up-sexp)
+  (visual-key "{" 'sp-backward-up-sexp)
+  (visual-key "}" 'sp-up-sexp))
 (evil-leader/set-key-for-mode 'clojure-mode
+  ;; Raise sexp
   "r" 'sp-raise-sexp
+  ;; Split sexp
   "s" 'sp-split-sexp
-  ")" 'sp-forward-slurp-sexp
-  "}" 'sp-forward-barf-sexp
-  "(" 'sp-backward-slurp-sexp
-  "{" 'sp-backward-barf-sexp)
+  ;; Jump to definition
+  "j" 'cider-find-var
+  ;; Lookup symbol in docs
+  "l" 'cider-doc
+  ;; Evaluate buffer
+  "e" 'cider-load-buffer)
 ;; Ensime
 (with-eval-after-load 'ensime
   (setq ensime-sem-high-enabled-p nil)
@@ -433,35 +466,40 @@
   ;; References of symbol
   "r" 'ensime-show-uses-of-symbol-at-point
   ;; Rename variable
-  "n" 'ensime-refactor-diff-rename
+  "sn" 'ensime-refactor-diff-rename
   ;; Jump to definition
   "j" 'ensime-edit-definition
-  ;; Expand selection
-  "." 'ensime-expand-selection-command
   ;; Lookup symbol in docs
   "l" 'ensime-show-doc-for-symbol-at-point
   ;; Type at point
-  "t" 'ensime-type-at-point
-  ;; SBT
-  "s" 'ensime-inf-switch)
+  "t" 'ensime-type-at-point)
 ;; Format scala source
-(add-hook 'scala-mode-hook
-  (lambda () (define-key scala-mode-map (kbd "C-c C-f") 'ensime-format-source)))
+(with-eval-after-load 'scala-mode
+  (define-key scala-mode-map (kbd "C-c C-f") 'ensime-format-source))
 ;; Find function (elisp)
 (evil-leader/set-key-for-mode 'emacs-lisp-mode "j" 'find-function)
 ;; Tern
 (evil-leader/set-key-for-mode 'js-mode "j" 'tern-find-definition)
 (evil-leader/set-key-for-mode 'js-mode "t" 'tern-get-type)
 ;; Format markdown (tidy)
-(add-hook 'markdown-mode-hook
-  (lambda () (define-key markdown-mode-map (kbd "C-c C-f") 'tidy-markdown)))
+(with-eval-after-load 'markdown-mode
+  (define-key markdown-mode-map (kbd "C-c C-f") 'tidy-markdown))
 ;; Go
 (add-hook 'go-mode-hook
   (lambda ()
+    (add-hook 'before-save-hook 'gofmt-before-save nil t)
+    (define-key go-mode-map (kbd "C-c C-f") 'gofmt)
+    (evil-leader/set-key-for-mode 'go-mode "j" 'godef-jump)
+    (evil-leader/set-key-for-mode 'go-mode "t" 'godef-describe)
+    (evil-leader/set-key-for-mode 'go-mode "l" 'godoc-at-point)
+    (evil-leader/set-key-for-mode 'go-mode "ia" 'go-import-add)
+    (evil-leader/set-key-for-mode 'go-mode "ir" 'go-remove-unused-imports)
     (setq-default)
     (setq tab-width 2)
     (setq standard-indent 2)
-    (setq indent-tabs-mode nil)))
+    (setq indent-tabs-mode nil)
+    (set (make-local-variable 'company-backends) '(company-go))
+    (company-mode)))
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -469,7 +507,7 @@
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (go-mode toml-mode racer evil-anzu rainbow-delimiters elixir-mode window-number clojure-mode smex evil-smartparens smartparens company-tern json-mode github-browse-file web-mode markdown-mode ace-jump-mode buffer-move drag-stuff csharp-mode browse-kill-ring projectile fsharp-mode evil-args evil-commentary ack evil-surround smart-mode-line highlight-numbers evil-leader ido-vertical-mode flx-ido evil ensime undo-tree magit))))
+    (yaml-mode company-go dumb-jump cider use-package-chords use-package dockerfile-mode gitignore-mode gitconfig-mode go-mode toml-mode racer evil-anzu rainbow-delimiters elixir-mode window-number clojure-mode smex evil-smartparens smartparens company-tern github-browse-file web-mode markdown-mode ace-jump-mode buffer-move drag-stuff csharp-mode browse-kill-ring projectile fsharp-mode evil-args evil-commentary ack evil-surround smart-mode-line highlight-numbers evil-leader ido-vertical-mode flx-ido evil ensime undo-tree magit))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
