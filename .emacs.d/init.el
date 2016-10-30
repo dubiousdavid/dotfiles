@@ -1,3 +1,13 @@
+(defun rename-file-and-buffer ()
+  "Rename the current buffer and file it is visiting."
+  (interactive)
+  (let ((filename (buffer-file-name)))
+    (if (not (and filename (file-exists-p filename)))
+        (message "Buffer is not visiting a file!")
+      (let ((new-name (read-file-name "New name: " (file-name-directory filename))))
+	(rename-file filename new-name t)
+	(set-visited-file-name new-name t t)))))
+
 (defun toggle-evil (mode)
   (if mode
       (evil-emacs-state 1)
@@ -40,27 +50,6 @@
   (if (find-file (ido-completing-read "Find recent file: " recentf-list))
       (message "Opening file...")
     (message "Aborting")))
-;; Paste pop
-(defun paste-pop (count)
-  "Pop the previous entry in the kill ring."
-  (interactive "p")
-  (let (interprogram-paste-function)
-    (evil-paste-pop count)))
-;; Paste pop next
-(defun paste-pop-next (count)
-  "Pop the next entry in the kill ring."
-  (interactive "p")
-  (let (interprogram-paste-function)
-    (evil-paste-pop-next count)))
-;; Copy (OSX)
-(defun copy-from-osx ()
-  (shell-command-to-string "pbpaste"))
-;; Paste (OSX)
-(defun paste-to-osx (text &optional push)
-  (let ((process-connection-type nil))
-    (let ((proc (start-process "pbcopy" "*Messages*" "pbcopy")))
-      (process-send-string proc text)
-      (process-send-eof proc))))
 ;; Duplicate line below
 (defun duplicate-line-below ()
   "Duplicate current line below."
@@ -121,8 +110,7 @@
 ;; Tern
 (defun tern-start ()
   (interactive)
-  (tern-mode t)
-  (company-mode t))
+  (tern-mode t))
 ;; Define keys for evil states
 (defmacro normal-key (keys f)
   `(define-key evil-normal-state-map (kbd ,keys) ,f))
@@ -138,6 +126,14 @@
      (interactive)
      (,f)
      (other-window 1)))
+(defun scroll-up-3-lines ()
+  "Scroll up 3 lines"
+  (interactive)
+  (scroll-up 3))
+(defun scroll-down-3-lines ()
+  "Scroll down 3 lines"
+  (interactive)
+  (scroll-down 3))
 ;; Initialize packages
 (require 'package)
 (setq package-enable-at-startup nil) ; To prevent initialising twice
@@ -169,22 +165,20 @@
 ;; Line numbers
 (global-linum-mode t)
 (setq linum-format "%4d ")
-
-;; Auto close brackets
-;; (electric-pair-mode 1)
+;; Mouse
+(xterm-mouse-mode 1)
+(global-set-key (kbd "<mouse-4>") 'scroll-down-3-lines)
+(global-set-key (kbd "<mouse-5>") 'scroll-up-3-lines)
 ;; Highlight matching bracket
 (show-paren-mode 1)
 ;; Smartparens
 (require 'smartparens-config)
 (add-hook 'prog-mode-hook 'smartparens-mode)
-(sp-with-modes '(elixir-mode)
-  (sp-local-pair "fn" "end"
-         :when '(("SPC" "RET"))
-         :actions '(insert navigate))
-  (sp-local-pair "do" "end"
-         :when '(("SPC" "RET"))
-         :post-handlers '(sp-ruby-def-post-handler)
-         :actions '(insert navigate)))
+;; Projectile
+(add-hook 'prog-mode-hook 'projectile-mode)
+(setq projectile-mode-line "")
+;; Whitespace mode
+(setq whitespace-line-column 120)
 ;; Emacs lisp mode
 (add-hook 'emacs-lisp-mode-hook 'prettify-symbols-mode)
 (add-hook 'emacs-lisp-mode-hook 'smartparens-strict-mode)
@@ -195,13 +189,11 @@
 ;; Remove trailing whitespace
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
 ;; Company
+(add-hook 'prog-mode-hook 'company-mode)
 (global-set-key (kbd "C-x C-o") 'company-complete)
 (global-set-key (kbd "TAB") #'company-indent-or-complete-common)
 (setq company-tooltip-align-annotations t)
 (with-eval-after-load 'company (add-to-list 'company-backends 'company-tern))
-(add-hook 'racer-mode-hook #'company-mode)
-(add-hook 'cider-repl-mode-hook #'company-mode)
-(add-hook 'cider-mode-hook #'company-mode)
 ;; Disable menu bar
 (menu-bar-mode -1)
 ;; No bell
@@ -223,12 +215,8 @@
 (setq ido-enable-flex-matching t)
 (setq ido-use-faces nil)
 (add-to-list 'ido-ignore-files "\\.DS_Store")
-;; Projectile
-(require 'projectile)
-(projectile-global-mode)
-(setq projectile-globally-ignored-files
-      '(".ensime_cache" ".ensime" "target" "project" "bin" "tmp"))
-(setq projectile-mode-line "")
+;; Rename current file
+(global-set-key (kbd "C-c r") 'rename-file-and-buffer)
 ;; Undo tree
 (global-undo-tree-mode)
 ;; Theme
@@ -238,7 +226,7 @@
 (add-hook 'json-mode-hook (lambda () (highlight-numbers-mode -1)))
 ;; Smart mode line
 (setq sml/no-confirm-load-theme t)
-(setq rm-blacklist '(" Undo-Tree" " s-/" " es" " yas" " Anzu" " Isearch"))
+(setq rm-blacklist '(" Undo-Tree" " s-/" " es" " yas" " Anzu" " Isearch" " company"))
 (sml/setup)
 ;; Window number
 (require 'window-number)
@@ -268,10 +256,8 @@
 (setq ack-command "ag ")
 ;; Input method
 (setq default-input-method "MacOSX")
-;; Make cut and paste work with the OS X clipboard
-(when (not window-system)
-  (setq interprogram-cut-function 'paste-to-osx)
-  (setq interprogram-paste-function 'copy-from-osx))
+;; Add clipboard to kill ring
+(setq save-interprogram-paste-before-kill t)
 ;; Web mode
 (add-to-list 'auto-mode-alist '("\\.erb\\'" . web-mode))
 (add-to-list 'auto-mode-alist '("\\.php\\'" . web-mode))
@@ -313,6 +299,8 @@
 (evil-mode 1)
 (insert-key "C-p" 'previous-line)
 (insert-key "C-n" 'next-line)
+(insert-key "C-a" 'beginning-of-line)
+(insert-key "C-e" 'end-of-line)
 (make-motion evil-forward-sexp sp-next-sexp)
 (make-motion evil-backward-sexp sp-backward-sexp)
 (evil-set-initial-state 'fundamental-mode 'emacs)
@@ -323,8 +311,12 @@
 (evil-set-initial-state 'dired-mode 'emacs)
 (evil-set-initial-state 'cider-docview-mode 'motion)
 (evil-set-initial-state 'cider-repl-mode 'insert)
+(evil-set-initial-state 'cider-stacktrace-mode 'motion)
+(evil-set-initial-state 'cider-popup-buffer-mode 'motion)
 (evil-declare-change-repeat 'company-complete)
 (add-hook 'magit-blame-mode-hook (lambda () (toggle-evil magit-blame-mode)))
+;; Visual star
+(global-evil-visualstar-mode)
 ;; Leader
 (global-evil-leader-mode)
 (evil-leader/set-leader ",")
@@ -354,21 +346,6 @@
 (motion-key ")" 'evil-forward-arg)
 (visual-key "(" 'evil-backward-arg)
 (visual-key ")" 'evil-forward-arg)
-;; Sexp motions
-(evil-define-key 'motion emacs-lisp-mode-map
-  (kbd "(") 'evil-backward-sexp
-  (kbd ")") 'evil-forward-sexp)
-(evil-define-key 'visual emacs-lisp-mode-map
-  (kbd "(") 'evil-backward-sexp
-  (kbd ")") 'evil-forward-sexp)
-(evil-define-key 'motion emacs-lisp-mode-map
-  (kbd "{") 'evil-backward-section-begin
-  (kbd "}") 'evil-forward-section-begin)
-(evil-define-key 'visual emacs-lisp-mode-map
-  (kbd "{") 'evil-backward-section-begin
-  (kbd "}") 'evil-forward-section-begin)
-(global-set-key (kbd "M-r") 'sp-raise-sexp)
-(global-set-key (kbd "C-a") 'beginning-of-defun)
 ;; Buffers and windows
 (normal-key "DEL" 'kill-this-buffer)
 ;; Forward buffer
@@ -399,9 +376,6 @@
 (normal-key "C-k" 'drag-stuff-up)
 (visual-key "C-j" 'drag-stuff-down)
 (visual-key "C-k" 'drag-stuff-up)
-;; Paste pop
-(normal-key "C-p" 'paste-pop)
-(normal-key "C-n" 'paste-pop-next)
 ;; nmap Y y$
 (normal-key "Y" 'copy-to-end-of-line)
 (motion-key "Y" 'copy-to-end-of-line)
@@ -442,12 +416,15 @@
   (normal-key "{" 'sp-backward-up-sexp)
   (normal-key "}" 'sp-up-sexp)
   (visual-key "{" 'sp-backward-up-sexp)
-  (visual-key "}" 'sp-up-sexp))
+  (visual-key "}" 'sp-up-sexp)
+  (define-key clojure-mode-map (kbd "C-c C-f") 'cider-format-buffer))
 (evil-leader/set-key-for-mode 'clojure-mode
   ;; Raise sexp
   "r" 'sp-raise-sexp
   ;; Split sexp
   "s" 'sp-split-sexp
+  ;; Kill sexp
+  "k" 'kill-sexp
   ;; Jump to definition
   "j" 'cider-find-var
   ;; Lookup symbol in docs
@@ -498,8 +475,14 @@
     (setq tab-width 2)
     (setq standard-indent 2)
     (setq indent-tabs-mode nil)
-    (set (make-local-variable 'company-backends) '(company-go))
-    (company-mode)))
+    (set (make-local-variable 'company-backends) '(company-go))))
+;; Elm
+(add-hook 'elm-mode-hook
+  (lambda ()
+    (elm-oracle-setup-completion)
+    (evil-leader/set-key-for-mode 'elm-mode "t" 'elm-oracle-type-at-point)
+    (evil-leader/set-key-for-mode 'elm-mode "l" 'elm-oracle-doc-at-point)))
+(with-eval-after-load 'company (add-to-list 'company-backends 'company-elm))
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -507,7 +490,7 @@
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (yaml-mode company-go dumb-jump cider use-package-chords use-package dockerfile-mode gitignore-mode gitconfig-mode go-mode toml-mode racer evil-anzu rainbow-delimiters elixir-mode window-number clojure-mode smex evil-smartparens smartparens company-tern github-browse-file web-mode markdown-mode ace-jump-mode buffer-move drag-stuff csharp-mode browse-kill-ring projectile fsharp-mode evil-args evil-commentary ack evil-surround smart-mode-line highlight-numbers evil-leader ido-vertical-mode flx-ido evil ensime undo-tree magit))))
+    (evil-visualstar elm-mode projectile yaml-mode company-go dumb-jump cider use-package-chords use-package dockerfile-mode gitignore-mode gitconfig-mode go-mode toml-mode racer evil-anzu rainbow-delimiters elixir-mode window-number clojure-mode smex evil-smartparens smartparens company-tern github-browse-file web-mode markdown-mode ace-jump-mode buffer-move drag-stuff csharp-mode browse-kill-ring fsharp-mode evil-args evil-commentary ack evil-surround smart-mode-line highlight-numbers evil-leader ido-vertical-mode flx-ido evil ensime undo-tree magit))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
