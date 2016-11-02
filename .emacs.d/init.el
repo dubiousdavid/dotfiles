@@ -1,3 +1,8 @@
+(defun pbcopy ()
+  (interactive)
+  (call-process-region (point) (mark) "pbcopy")
+  (setq deactivate-mark t))
+
 (defun rename-file-and-buffer ()
   "Rename the current buffer and file it is visiting."
   (interactive)
@@ -333,8 +338,7 @@
 		     ;; Git
                      "gs" 'magit-status-window
                      "gh" 'github-browse-file
-		     "gb" 'magit-blame
-		     "gl" 'magit-log-buffer-file)
+		     "gb" 'magit-blame)
 ;; Dumb jump
 (dumb-jump-mode)
 (normal-key "gj" 'dumb-jump-go)
