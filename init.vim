@@ -17,6 +17,7 @@ Plug 'luochen1990/rainbow'
 Plug 'cohama/lexima.vim'
 Plug 'timkendrick/vim-duplicate'
 Plug 'henrik/vim-indexed-search'
+Plug 'vim-scripts/argtextobj.vim'
 Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
 Plug 'nsf/gocode', {'for': 'go', 'rtp': 'nvim', 'do': '~/.config/nvim/plugged/gocode/nvim/symlink.sh'}
 Plug 'zchee/deoplete-go', {'for': 'go', 'do': 'make'}
