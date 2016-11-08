@@ -192,7 +192,7 @@ let g:rainbow_conf={
 " CtrlP
 nmap <Leader>f :CtrlP<CR>
 nmap <Leader>b :CtrlPBuffer<CR>
-nmap <Leader>m :CtrlPMRUFiles<CR>
+nmap <Leader>r :CtrlPMRUFiles<CR>
 let g:ctrlp_user_command="ag -f -U --hidden -g '' %s"
 let g:ctrlp_open_new_file='r'
 let g:ctrlp_open_multiple_files='i'
@@ -214,6 +214,8 @@ nmap <Leader>gd :terminal git diff<CR>
 nmap <Leader>gl :terminal git tree<CR>
 nmap <Leader>gg :Ggrep<Space>
 nmap <Leader>ge :Gedit<Space>
+nmap <Leader>gf :Gfetch<Space>
+nmap <Leader>gF :Gpull<Space>
 nmap <Leader>gp :! git push<CR>
 " Open lines without changing to Insert mode
 nmap <Leader>o o<Esc>
@@ -227,11 +229,11 @@ let g:netrw_winsize = 20
 " Display full path of current file
 nmap <Leader>n :echo expand('%:p')<CR>
 " Ensime
-au FileType scala nmap <Leader>j :EnDeclaration<CR>
-au FileType scala nmap <Leader>t :EnType<CR>
-au FileType scala nmap <Leader>d :EnDocBrowse<CR>
-au FileType scala nmap <Leader>c :EnTypeCheck<CR>
-au FileType scala nmap <Leader>r :EnRename<CR>
+au FileType scala nmap <Leader>ej :EnDeclaration<CR>
+au FileType scala nmap <Leader>et :EnType<CR>
+au FileType scala nmap <Leader>ed :EnDocBrowse<CR>
+au FileType scala nmap <Leader>ec :EnTypeCheck<CR>
+au FileType scala nmap <Leader>er :EnRename<CR>
 " Deoplete
 let g:deoplete#enable_at_startup=1
 let g:deoplete#sources = {}
@@ -239,7 +241,7 @@ let g:deoplete#sources.scala = ['buffer', 'tags', 'omni']
 let g:deoplete#omni#input_patterns = {}
 let g:deoplete#omni#input_patterns.scala = ['[^. *\t0-9]\.\w*',': [A-Z]\w', '[\[\t\( ][A-Za-z]\w*']
 " Go
-au FileType go nmap <Leader>j <Plug>(go-def)
-au FileType go nmap <leader>t <Plug>(go-info)
-au FileType go nmap <Leader>d <Plug>(go-doc)
-au FileType go nmap <leader>r <Plug>(go-rename)
+au FileType go nmap <Leader>ej <Plug>(go-def)
+au FileType go nmap <leader>et <Plug>(go-info)
+au FileType go nmap <Leader>ed <Plug>(go-doc)
+au FileType go nmap <leader>er <Plug>(go-rename)
