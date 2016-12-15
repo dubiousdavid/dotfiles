@@ -3,15 +3,13 @@ export ZSH=/Users/dsargeant/.oh-my-zsh
 # Theme
 ZSH_THEME="david"
 # Plugins
-plugins=(urltools aws brew docker)
+plugins=(urltools aws docker)
 # zsh-autosuggestions
 # Path
 export PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Users/dsargeant/bin:/usr/local/sbin
+export NODE_PATH=/usr/local/lib/node_modules
 
 source $ZSH/oh-my-zsh.sh
-
-# Autosuggest accept
-# ZSH_AUTOSUGGEST_ACCEPT_WIDGETS=(end-of-line vi-forward-char vi-end-of-line vi-add-eol)
 
 export EDITOR=nvim
 export PROJ=~/Projects
@@ -19,6 +17,9 @@ export BROWSER="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 # Aliases
 alias c=clear
 alias g=git
+alias gc="git commit"
+alias gs="git status"
+alias ga="git add"
 alias magit="emacs -nw --load='~/.emacs.d/magit-init.el' --no-splash"
 # alias magit="emacsclient -nw -e '(magit-status-window)'"
 alias v=nvim
@@ -31,7 +32,25 @@ alias qa="AWS_PROFILE=qa"
 alias maurice="git log --after='yesterday' --author='Maurice'"
 alias ports="lsof -iTCP -sTCP:LISTEN -n -P"
 alias b=bible
+alias consul-start="consul agent -server -bootstrap -ui -log-level debug -node local-dev -bind=127.0.0.1 -data-dir ~/Projects/Consul/data"
+alias jpp="jq '.'"
+# Paging via Vim
+export MANPAGER="nvim -c 'set ft=man' -"
+export PAGER="nvim -c PAGER -"
+# Go
+export GOPATH=$PROJ/Go
+export PATH=$PATH:$GOPATH/bin:/usr/local/go/bin
+# FZF
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+export FZF_DEFAULT_COMMAND="ag -f -U --hidden -g ''"
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+# Private Boomtown commands
+source ~/Projects/boomtown.sh
+# z (nice autocompletion of frequently used directories)
+source ~/Projects/z/z.sh
+
 join() { local IFS="$1"; shift; echo "$*"; }
+
 port() {
   if [ -z "$@" ]; then
     echo "Usage: port [port # ...]"
@@ -39,6 +58,7 @@ port() {
     lsof -iTCP:$(join , "$@") -sTCP:LISTEN -n -P
   fi
 }
+
 kill-port() {
   if [ -z "$@" ]; then
     echo "Usage: kill-port [port # ...]"
@@ -46,21 +66,7 @@ kill-port() {
     port "$@" | awk 'NR!=1 {print $2}' | xargs kill
   fi
 }
-# Paging via Vim
-export MANPAGER="nvim -c MANPAGER -"
-export PAGER="nvim -c PAGER -"
-# Go
-export GOPATH=$PROJ/Go
-export PATH=$PATH:$GOPATH/bin:/usr/local/go/bin
-# FZF
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-export FZF_DEFAULT_COMMAND="ag -U --hidden -g ''"
-export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
-# Artifact authentication
-source ~/.boomtown
-# z (nice autocompletion of frequently used directories)
-source ~/Projects/z/z.sh
-
+#
 # Change projects
 proj() {
   cd $PROJ/$1
@@ -103,16 +109,23 @@ rc(){
   esac
 }
 
+docker-clean-images() {
+  docker rmi "$(docker images -a --filter=dangling=true -q)"
+}
+
+docker-clean-ps() {
+  docker rm "$(docker ps --filter=status=exited --filter=status=created -q)"
+}
+
 findContainerId() {
   docker ps --filter ancestor=$1 | awk 'NR!=1 {print $1}'
 }
 
-pull-docs() {
+build-docs() {
   local containerId
   containerId=$(findContainerId boomtown/api-docs)
   [ $containerId ] && echo "Stopping api-docs ($containerId)" && docker stop $containerId 1>/dev/null
-  cd "$PROJ/api-docs"
-  git pull origin master
+  cd "$PROJ/BoomTownROI/api-docs"
   docker build -t boomtown/api-docs .
   api-docs
 }
@@ -123,7 +136,7 @@ api-docs() {
 
   if [[ -z $containerId ]]; then
     echo "Starting api-docs..."
-    docker run -d -p 4567:4567 boomtown/api-docs
+    docker run -d -p 4567:4567 -v $PROJ/BoomTownROI/api-docs/source:/app/source boomtown/api-docs
   else
     echo "api-docs already running ($containerId)"
   fi
@@ -139,4 +152,36 @@ redis() {
   else
     echo "redis already running ($containerId)"
   fi
+}
+
+truncate-alerts-visible() {
+  aws dynamodb scan --table-name UserAlertsVisible |
+  jq -c '.Items[] | {userId: .userId, userAlertId: .userAlertId}' |
+  sed "s/.*/'&'/" |
+  xargs -L1 aws dynamodb delete-item --table-name UserAlertsVisible --key
+}
+
+truncate-insights-visible() {
+  aws dynamodb scan --table-name InsightsVisible |
+  jq -c '.Items[] | {userId: .userId, insightId: .insightId}' |
+  sed "s/.*/'&'/" |
+  xargs -L1 aws dynamodb delete-item --table-name InsightsVisible --key
+}
+
+sbt-local() {
+  sbt publishLocal "-DLIB_VERSION=$1"
+}
+
+path() { for f in "$@"; do echo ${f}(:A); done }
+
+myip() { ifconfig | grep inet }
+
+current-branch() {
+  git rev-parse --abbrev-ref HEAD
+}
+
+contains-branch() {
+  local branch=$1
+
+  git log --oneline | grep $(git show-branch --sha1-name $branch | sed 's/\[(.*)\].*/\1/')
 }
