@@ -4,7 +4,6 @@ export ZSH=/Users/dsargeant/.oh-my-zsh
 ZSH_THEME="david"
 # Plugins
 plugins=(urltools aws docker)
-# zsh-autosuggestions
 # Path
 export PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Users/dsargeant/bin:/usr/local/sbin
 export NODE_PATH=/usr/local/lib/node_modules
@@ -51,6 +50,7 @@ source ~/Projects/z/z.sh
 
 join() { local IFS="$1"; shift; echo "$*"; }
 
+# Print what's running on one or more ports
 port() {
   if [ -z "$@" ]; then
     echo "Usage: port [port # ...]"
@@ -59,6 +59,7 @@ port() {
   fi
 }
 
+# Kill one or more ports
 kill-port() {
   if [ -z "$@" ]; then
     echo "Usage: kill-port [port # ...]"
@@ -89,6 +90,7 @@ dh() {
   cd "$dir"
 }
 
+# Search the Bible
 bible() {
   if [ -z "$*" ]; then
     http --body "http://www.esvapi.org/v2/rest/dailyVerse?key=IP&output-format=plain-text"
@@ -121,6 +123,7 @@ findContainerId() {
   docker ps --filter ancestor=$1 | awk 'NR!=1 {print $1}'
 }
 
+# Build API docs
 build-docs() {
   local containerId
   containerId=$(findContainerId boomtown/api-docs)
@@ -130,7 +133,8 @@ build-docs() {
   api-docs
 }
 
-api-docs() {
+# Start API docs
+start-docs() {
   local containerId
   containerId=$(findContainerId boomtown/api-docs)
 
@@ -142,6 +146,21 @@ api-docs() {
   fi
 }
 
+# Open API docs
+open-docs() {
+  open "http://localhost:4567"
+}
+
+docs() {
+  case $1 in
+    open) open-docs ;;
+    build) build-docs ;;
+    start) start-docs ;;
+    *) start-docs ;;
+  esac
+}
+
+# Start Redis
 redis() {
   local containerId
   containerId=$(findContainerId redis)
@@ -172,6 +191,7 @@ sbt-local() {
   sbt publishLocal "-DLIB_VERSION=$1"
 }
 
+# Print the absolute path of the given files
 path() { for f in "$@"; do echo ${f}(:A); done }
 
 myip() { ifconfig | grep inet }
@@ -184,4 +204,10 @@ contains-branch() {
   local branch=$1
 
   git log --oneline | grep $(git show-branch --sha1-name $branch | sed 's/\[(.*)\].*/\1/')
+}
+
+# Generate a new local application.json file
+gen-config() {
+  node $PROJ/BoomTownROI/service-configuration/generate.js -s '{"sqlDatabase": "boomtown_david"}' > \
+    $PROJ/config/local/scala/application.json
 }

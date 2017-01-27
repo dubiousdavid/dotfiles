@@ -6,7 +6,7 @@ call plug#begin()
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 " Opening files and buffers
-Plug 'ctrlpvim/ctrlp.vim'
+" Plug 'ctrlpvim/ctrlp.vim'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
 " Word and character motions
@@ -35,6 +35,12 @@ Plug 'timkendrick/vim-duplicate'
 Plug 'henrik/vim-indexed-search'
 " Motions for function arguments
 Plug 'b4winckler/vim-angry'
+" Sort motion
+Plug 'christoomey/vim-sort-motion'
+" Grep
+" Plug 'mhinz/vim-grepper'
+" Open file at last edit position
+Plug 'dietsche/vim-lastplace'
 " Auto completion
 Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
 " Auto completion for Go
@@ -64,6 +70,8 @@ Plug 'vim-scripts/closetag.vim', {'for': ['html', 'xml']}
 Plug 'maksimr/vim-jsbeautify', {'for': ['html', 'xml', 'javascript', 'css', 'json']}
 " Javascript (ES6)
 Plug 'jelera/vim-javascript-syntax', {'for': 'javascript'}
+" JSX
+Plug 'mxw/vim-jsx'
 " Clojure
 Plug 'guns/vim-clojure-static', {'for': 'clojure'}
 " F#
@@ -72,14 +80,10 @@ Plug 'ervandew/supertab', {'for': 'fsharp'}
 Plug 'fsharp/vim-fsharp', {'for': 'fsharp', 'do': 'make fsautocomplete'}
 " Elm
 Plug 'ElmCast/elm-vim', {'for': 'elm'}
-" Sort motion
-Plug 'christoomey/vim-sort-motion'
-" Grep
-Plug 'mhinz/vim-grepper'
 call plug#end()
 " Color theme
 colorscheme tir_black
-" Show replacement inline
+" Show replacement inline (kind of broken)
 " set inccommand=nosplit
 " Don't show mode below statusline
 set noshowmode
@@ -205,13 +209,12 @@ let g:rainbow_conf={
 \}
 " FZF
 nmap <Leader>f :Files<CR>
+nmap <Leader>r :History<CR>
+nmap <Leader>b :Buffers<CR>
 " CtrlP
-nmap <Leader>b :CtrlPBuffer<CR>
-nmap <Leader>r :CtrlPMRUFiles<CR>
-let g:ctrlp_user_command="ag -f -U --hidden -g '' %s"
-let g:ctrlp_open_new_file='r'
-let g:ctrlp_open_multiple_files='i'
-let g:ctrlp_extensions=['dir']
+" let g:ctrlp_open_new_file='r'
+" let g:ctrlp_open_multiple_files='i'
+" let g:ctrlp_match_window = 'results:0'
 " Clojure
 let g:clojure_syntax_keywords={'clojureDefine': ['defn$','defna','defnv'], 'clojureSpecial': ['fn$','fna','fnv']}
 " Ag
@@ -274,3 +277,5 @@ autocmd FileType xml noremap <buffer> <c-f> :call HtmlBeautify()<cr>
 autocmd FileType css noremap <buffer> <c-f> :call CSSBeautify()<cr>
 " Sort (case insensitive)
 let g:sort_motion_flags = "i"
+" JSX
+let g:jsx_ext_required = 0
