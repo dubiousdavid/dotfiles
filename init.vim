@@ -6,7 +6,6 @@ call plug#begin()
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 " Opening files and buffers
-" Plug 'ctrlpvim/ctrlp.vim'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
 " Word and character motions
@@ -19,8 +18,6 @@ Plug 'ntpeters/vim-better-whitespace'
 Plug 'tpope/vim-fugitive'
 " Extend . command
 Plug 'tpope/vim-repeat'
-" Display yank ring
-Plug 'vim-scripts/YankRing.vim'
 " Surround text with delimeters
 Plug 'tpope/vim-surround'
 " Motions for adding/removing comments
@@ -37,10 +34,10 @@ Plug 'henrik/vim-indexed-search'
 Plug 'b4winckler/vim-angry'
 " Sort motion
 Plug 'christoomey/vim-sort-motion'
-" Grep
-" Plug 'mhinz/vim-grepper'
 " Open file at last edit position
 Plug 'dietsche/vim-lastplace'
+" Recent files (overrides start screen)
+Plug 'mhinz/vim-startify'
 " Auto completion
 Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
 " Auto completion for Go
@@ -69,9 +66,11 @@ Plug 'vim-scripts/closetag.vim', {'for': ['html', 'xml']}
 " Format Javascript
 Plug 'maksimr/vim-jsbeautify', {'for': ['html', 'xml', 'javascript', 'css', 'json']}
 " Javascript (ES6)
-Plug 'jelera/vim-javascript-syntax', {'for': 'javascript'}
+Plug 'pangloss/vim-javascript', {'for': 'javascript'}
 " JSX
-Plug 'mxw/vim-jsx'
+Plug 'mxw/vim-jsx', {'for': 'javascript'}
+" Snippets
+Plug 'SirVer/ultisnips'
 " Clojure
 Plug 'guns/vim-clojure-static', {'for': 'clojure'}
 " F#
@@ -177,17 +176,14 @@ imap <C-b> <Left>
 " Stay in visual mode when indenting
 vnoremap < <gv
 vnoremap > >gv
+" Override Y
+nnoremap Y y$
 " Entire file
 onoremap af :<C-u>normal! ggVG<CR>
 " Strip trailing whitespace
 let g:strip_whitespace_on_save=1
 " Don't highlight trailing whitespace
 let g:better_whitespace_enabled=0
-" YankRing
-nmap <Leader>y :YRShow<CR>
-function! YRRunAfterMaps()
-  nnoremap Y :<C-U>YRYankCount 'y$'<CR>
-endfunction
 " Easy Motion
 map <Leader>c <Plug>(easymotion-s)
 map <Leader>w <Plug>(easymotion-bd-w)
@@ -209,7 +205,6 @@ let g:rainbow_conf={
 \}
 " FZF
 nmap <Leader>f :Files<CR>
-nmap <Leader>r :History<CR>
 nmap <Leader>b :Buffers<CR>
 " CtrlP
 " let g:ctrlp_open_new_file='r'
@@ -279,3 +274,8 @@ autocmd FileType css noremap <buffer> <c-f> :call CSSBeautify()<cr>
 let g:sort_motion_flags = "i"
 " JSX
 let g:jsx_ext_required = 0
+" Startify
+nmap <Leader>r :Startify<CR>
+let g:startify_list_order = ['dir', 'files', 'bookmarks', 'sessions', 'commands']
+let g:startify_change_to_dir = 0
+let g:startify_custom_header = []
