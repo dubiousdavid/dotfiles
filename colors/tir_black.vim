@@ -44,7 +44,7 @@ if version >= 700 " Vim 7.x specific colors
  hi MatchParen guifg=#f6f3e8 guibg=#857b6f gui=bold ctermfg=white ctermbg=darkgray
  hi Pmenu guifg=#f6f3e8 guibg=#444444 ctermfg=white ctermbg=242
  hi PmenuSel guifg=#000000 guibg=#cae682 ctermfg=0 ctermbg=195
- hi Search guifg=#000000 guibg=#cae682 ctermfg=0 ctermbg=195
+ hi Search cterm=NONE ctermfg=NONE ctermbg=NONE
 endif
 
 " Syntax highlighting
@@ -65,7 +65,7 @@ hi Type guifg=#FFFFB6 ctermfg=229
 hi Statement guifg=#6699CC ctermfg=110
 
 hi Special guifg=#E18964 ctermfg=173
-hi Delimiter guifg=#00A0A0 ctermfg=37
+hi Delimiter guifg=darkgray ctermfg=darkgray
 hi Operator guifg=white ctermfg=white
 
 hi link Character Constant
@@ -124,8 +124,13 @@ hi link htmlTagName Conditional
 hi link htmlEndTag Identifier
 
 " Special for Javascript
-hi link javaScriptNumber Number
+hi link Noise Delimiter
 
 " Special for CSharp
 hi link csXmlTag Keyword
 
+" Diff
+highlight DiffAdd cterm=none ctermfg=fg ctermbg=DarkGreen gui=none guifg=fg guibg=DarkGreen
+highlight DiffDelete cterm=none ctermfg=fg ctermbg=DarkRed gui=none guifg=fg guibg=DarkRed
+highlight DiffChange cterm=none ctermfg=fg ctermbg=DarkBlue gui=none guifg=fg guibg=DarkBlue
+highlight DiffText cterm=none ctermfg=bg ctermbg=White gui=none guifg=bg guibg=Yellow

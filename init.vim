@@ -48,9 +48,6 @@ Plug 'zchee/deoplete-go', {'for': 'go', 'do': 'make'}
 Plug 'fatih/vim-go', {'tag': 'v1.6', 'for': 'go'}
 " Extend % matching
 Plug 'matchit.zip', {'for': ['html', 'xml', 'sh', 'vim']}
-" Use vim as a pager
-Plug 'lambdalisue/vim-pager', {'on': 'PAGER'}
-Plug 'powerman/vim-plugin-AnsiEsc', {'on': 'PAGER'}
 " Rust
 Plug 'rust-lang/rust.vim', {'for': 'rust'}
 " Scala
@@ -79,6 +76,11 @@ Plug 'ervandew/supertab', {'for': 'fsharp'}
 Plug 'fsharp/vim-fsharp', {'for': 'fsharp', 'do': 'make fsautocomplete'}
 " Elm
 Plug 'ElmCast/elm-vim', {'for': 'elm'}
+" Typescript
+Plug 'leafgarland/typescript-vim', {'for': 'typescript'}
+Plug 'Quramy/tsuquyomi', {'for': 'typescript', 'do': 'make -f make_mac.mak'}
+Plug 'Shougo/vimproc.vim', {'do' : 'make'}
+" Plug 'mhartington/nvim-typescript', {'for': 'typescript'}
 call plug#end()
 " Color theme
 colorscheme tir_black
@@ -119,7 +121,7 @@ set wildmenu
 " Enable mouse in all modes
 set mouse=a
 " Omnicomplete
-set completeopt=longest,menuone
+set completeopt=longest,menuone,preview
 set omnifunc=syntaxcomplete#Complete
 " List
 set listchars+=space:.
@@ -191,33 +193,18 @@ nmap <Leader>w <Plug>(easymotion-overwin-w)
 map <Leader>W <Plug>(easymotion-bd-W)
 " Rainbow
 let g:rainbow_active=1
-let g:rainbow_conf={
-\	'ctermfgs': ['darkgray', 'gray'],
-\	'operators': '_,_',
-\	'parentheses': ['start=/(/ end=/)/ fold', 'start=/\[/ end=/\]/ fold', 'start=/{/ end=/}/ fold'],
-\	'separately': {
-\		'*': {},
-\		'vim': {
-\			'parentheses': ['start=/(/ end=/)/', 'start=/\[/ end=/\]/', 'start=/{/ end=/}/ fold', 'start=/(/ end=/)/ containedin=vimFuncBody', 'start=/\[/ end=/\]/ containedin=vimFuncBody', 'start=/{/ end=/}/ fold containedin=vimFuncBody'],
-\		},
-\		'css': 0,
-\	}
-\}
+let g:rainbow_conf={'ctermfgs': ['darkgray', 'gray']}
 " FZF
 nmap <Leader>f :Files<CR>
 nmap <Leader>b :Buffers<CR>
-" CtrlP
-" let g:ctrlp_open_new_file='r'
-" let g:ctrlp_open_multiple_files='i'
-" let g:ctrlp_match_window = 'results:0'
 " Clojure
 let g:clojure_syntax_keywords={'clojureDefine': ['defn$','defna','defnv'], 'clojureSpecial': ['fn$','fna','fnv']}
 " Ag
-function! s:TAg(term)
+function! s:Ag(term)
   execute 'te ag --pager=less ' . a:term
 endfunction
-command! -nargs=1 TAg call s:TAg(<f-args>)
-nmap <Leader>a :TAg<Space>
+command! -nargs=1 Ag call s:Ag(<f-args>)
+nmap <Leader>a :Ag<Space>
 " Git
 nmap <Leader>gh :Gbrowse<CR>
 vmap <Leader>gh :Gbrowse<CR>
@@ -231,11 +218,11 @@ nmap <Leader>ge :Gedit<Space>
 nmap <Leader>gf :!git fetch<CR>
 nmap <Leader>gF :!git pull<CR>
 nmap <Leader>gp :!git push<CR>
+nmap <Leader>gup :!git push -u origin $(git rev-parse --abbrev-ref HEAD)<CR>
 " Open lines without changing to Insert mode
 nmap <Leader>o o<Esc>
 nmap <Leader>O O<Esc>
 " netrw
-let g:netrw_banner = 0
 let g:netrw_liststyle = 3
 " Display full path of current file
 nmap <Leader>n :echo expand('%:p')<CR>
@@ -246,18 +233,23 @@ au FileType scala nmap <buffer> <silent> <Leader>T :EnTypeCheck<CR>
 au FileType scala nmap <buffer> <silent> <Leader>i :EnInspectType<CR>
 au FileType scala nmap <buffer> <silent> <Leader>l :EnDocBrowse<CR>
 au FileType scala nmap <buffer> <silent> <Leader>x :EnRename<CR>
-" autocmd BufWritePost *.scala silent :EnTypeCheck
+" au BufWritePost *.scala silent :EnTypeCheck
 " Deoplete
 let g:deoplete#enable_at_startup=1
 let g:deoplete#sources = {}
 let g:deoplete#sources.scala = ['buffer', 'tags', 'omni']
 let g:deoplete#omni#input_patterns = {}
-" let g:deoplete#omni#input_patterns.scala = ['[^. *\t0-9]\.\w*',': [A-Z]\w', '[\[\t\( ][A-Za-z]\w*']
 " Go
 au FileType go nmap <buffer> <silent> <Leader>j <Plug>(go-def)
 au FileType go nmap <buffer> <silent> <Leader>t <Plug>(go-info)
 au FileType go nmap <buffer> <silent> <Leader>l <Plug>(go-doc)
 au FileType go nmap <buffer> <silent> <Leader>x <Plug>(go-rename)
+" Typescript
+au FileType typescript nmap <buffer> <silent> <Leader>j :TsuDefinition<CR>
+au FileType typescript nmap <buffer> <silent> <Leader>i :TsuImport<CR>
+au FileType typescript nmap <buffer> <silent> <Leader>t : <C-u>echo tsuquyomi#hint()<CR>
+au FileType typescript nmap <buffer> <silent> <Leader>x <Plug>(TsuquyomiRenameSymbol)
+let g:tsuquyomi_completion_detail = 1
 " XML
 au FileType xml nmap <buffer> <silent> <Leader>xc :!xmllint --noout %<CR>
 " Save window position when changing buffers
