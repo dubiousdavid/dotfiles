@@ -9,3 +9,4 @@ Thumbs.db
 .ensime_cache
 *.iml
 .agignore
+.tern-port

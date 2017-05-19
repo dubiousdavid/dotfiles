@@ -26,6 +26,7 @@ alias qa="AWS_PROFILE=qa"
 alias ports="lsof -iTCP -sTCP:LISTEN -n -P"
 alias b=bible
 alias jpp="jq '.'"
+alias saml="python $PROJ/BoomTownROI/saml-setup.py"
 # Paging via Vim
 export MANPAGER="nvim -c 'set ft=man' -"
 # export PAGER="nvim -c PAGER -"
@@ -36,6 +37,7 @@ export PATH=$PATH:$GOPATH/bin:/usr/local/go/bin
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 export FZF_DEFAULT_COMMAND="ag -f -U --hidden -g ''"
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+# export FZF_DEFAULT_OPTS="--reverse"
 # Private Boomtown commands
 source ~/Projects/boomtown.sh
 # z (nice autocompletion of frequently used directories)
@@ -64,6 +66,10 @@ kill-port() {
 # Change projects
 proj() {
   cd $PROJ/$1
+}
+
+bt() {
+  proj BoomTownROI
 }
 
 # Change to root directory of current git repo
@@ -237,4 +243,8 @@ serve() {
   else
     browser-sync start --server --files "$1"
   fi
+}
+
+mongo() {
+  docker run -d -p 27017:27017 mongo
 }

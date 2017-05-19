@@ -14,8 +14,10 @@ Plug 'easymotion/vim-easymotion'
 Plug 'airblade/vim-gitgutter'
 " Remove trailing whitespace
 Plug 'ntpeters/vim-better-whitespace'
-" Git/Github integration
+" Git integration
 Plug 'tpope/vim-fugitive'
+" Github integration
+Plug 'tpope/vim-rhubarb'
 " Extend . command
 Plug 'tpope/vim-repeat'
 " Surround text with delimeters
@@ -29,7 +31,7 @@ Plug 'cohama/lexima.vim'
 " Duplicate lines and visual selection
 Plug 'timkendrick/vim-duplicate'
 " Display search count
-Plug 'henrik/vim-indexed-search'
+" Plug 'henrik/vim-indexed-search'
 " Motions for function arguments
 Plug 'b4winckler/vim-angry'
 " Sort motion
@@ -38,8 +40,20 @@ Plug 'christoomey/vim-sort-motion'
 Plug 'dietsche/vim-lastplace'
 " Recent files (overrides start screen)
 Plug 'mhinz/vim-startify'
+" File commands
+Plug 'tpope/vim-eunuch'
+" Ack, find and replace
+Plug 'wincent/ferret'
+" Scratch
+Plug 'mtth/scratch.vim'
+" Formatter
+Plug 'sbdchd/neoformat'
 " Auto completion
 Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+" Angular/Typescript
+" Plug 'Quramy/vim-js-pretty-template', {'for': 'typescript'}
+" Flow
+" Plug 'flowtype/vim-flow'
 " Auto completion for Go
 Plug 'nsf/gocode', {'for': 'go', 'rtp': 'nvim', 'do': '~/.config/nvim/plugged/gocode/nvim/symlink.sh'}
 " Go integration for deoplete
@@ -51,7 +65,7 @@ Plug 'matchit.zip', {'for': ['html', 'xml', 'sh', 'vim']}
 " Rust
 Plug 'rust-lang/rust.vim', {'for': 'rust'}
 " Scala
-Plug 'ensime/ensime-vim', {'for': 'scala'}
+Plug 'ensime/ensime-vim', {'for': 'scala', 'commit': '1b32e85f5c1883af3946cf2bf7a39f60801f47b1'}
 Plug 'derekwyatt/vim-scala', {'for': ['scala', 'sbt.scala']}
 " VCL
 Plug 'smerrill/vcl-vim-plugin', {'for': 'vcl'}
@@ -59,15 +73,17 @@ Plug 'smerrill/vcl-vim-plugin', {'for': 'vcl'}
 Plug 'cespare/vim-toml', {'for': 'toml'}
 " HTML5
 Plug 'othree/html5.vim', {'for': ['html', 'xml']}
-Plug 'vim-scripts/closetag.vim', {'for': ['html', 'xml']}
+" Keybindings for closing tags
+Plug 'tpope/vim-ragtag', {'for': ['javascript', 'html', 'xml']}
 " Format Javascript
-Plug 'maksimr/vim-jsbeautify', {'for': ['html', 'xml', 'javascript', 'css', 'json']}
+Plug 'maksimr/vim-jsbeautify', {'for': ['html', 'xml', 'css', 'json']}
 " Javascript (ES6)
 Plug 'pangloss/vim-javascript', {'for': 'javascript'}
 " JSX
 Plug 'mxw/vim-jsx', {'for': 'javascript'}
 " Snippets
 Plug 'SirVer/ultisnips'
+Plug 'honza/vim-snippets'
 " Clojure
 Plug 'guns/vim-clojure-static', {'for': 'clojure'}
 " F#
@@ -118,6 +134,10 @@ set ignorecase smartcase
 set nohls
 " Better? completion on command line
 set wildmenu
+" Don't offer to open certain files/directories
+set wildignore+=*.bmp,*.gif,*.ico,*.jpg,*.png,*.ico
+set wildignore+=*.pdf,*.psd
+set wildignore+=node_modules/*,bower_components/*
 " Enable mouse in all modes
 set mouse=a
 " Omnicomplete
@@ -149,6 +169,14 @@ autocmd BufWinEnter,WinEnter term://* startinsert
 " vim-airline
 set laststatus=2
 let g:airline_theme='murmur'
+let g:airline_left_sep=''
+let g:airline_right_sep=''
+if !exists('g:airline_symbols')
+  let g:airline_symbols = {}
+endif
+let g:airline_symbols.readonly='RO'
+let g:airline_symbols.linenr = ''
+let g:airline_symbols.maxlinenr = ''
 " Horizontal split
 nmap _ :sp<CR>
 " Backspace closes buffer
@@ -193,7 +221,8 @@ nmap <Leader>w <Plug>(easymotion-overwin-w)
 map <Leader>W <Plug>(easymotion-bd-W)
 " Rainbow
 let g:rainbow_active=1
-let g:rainbow_conf={'ctermfgs': ['darkgray', 'gray']}
+let g:rainbow_conf={'ctermfgs': ['darkgray', 'gray'], 'separately': {'html': {}}}
+au FileType sh call rainbow#clear()
 " FZF
 nmap <Leader>f :Files<CR>
 nmap <Leader>b :Buffers<CR>
@@ -219,6 +248,7 @@ nmap <Leader>gf :!git fetch<CR>
 nmap <Leader>gF :!git pull<CR>
 nmap <Leader>gp :!git push<CR>
 nmap <Leader>gup :!git push -u origin $(git rev-parse --abbrev-ref HEAD)<CR>
+nmap <Leader>gn :GitGutterNextHunk<CR>
 " Open lines without changing to Insert mode
 nmap <Leader>o o<Esc>
 nmap <Leader>O O<Esc>
@@ -237,8 +267,10 @@ au FileType scala nmap <buffer> <silent> <Leader>x :EnRename<CR>
 " Deoplete
 let g:deoplete#enable_at_startup=1
 let g:deoplete#sources = {}
-let g:deoplete#sources.scala = ['buffer', 'tags', 'omni']
+" let g:deoplete#sources.scala = ['buffer', 'tags', 'omni']
+let g:deoplete#sources.scala = ['tags', 'omni']
 let g:deoplete#omni#input_patterns = {}
+" let g:deoplete#omni#input_patterns.scala = ['[^. *\t0-9]\.\w*',': [A-Z]\w', '[\[\t\( ][A-Za-z]\w*']
 " Go
 au FileType go nmap <buffer> <silent> <Leader>j <Plug>(go-def)
 au FileType go nmap <buffer> <silent> <Leader>t <Plug>(go-info)
@@ -256,9 +288,7 @@ au FileType xml nmap <buffer> <silent> <Leader>xc :!xmllint --noout %<CR>
 au BufLeave * let b:winview = winsaveview()
 au BufEnter * if(exists('b:winview')) | call winrestview(b:winview) | endif
 " Format
-" autocmd FileType javascript noremap <buffer> <c-f> :call JsBeautify()<cr>
 autocmd FileType json noremap <buffer> <c-f> :call JsonBeautify()<cr>
-autocmd FileType jsx noremap <buffer> <c-f> :call JsxBeautify()<cr>
 autocmd FileType html noremap <buffer> <c-f> :call HtmlBeautify()<cr>
 autocmd FileType xml noremap <buffer> <c-f> :call HtmlBeautify()<cr>
 autocmd FileType css noremap <buffer> <c-f> :call CSSBeautify()<cr>
@@ -271,3 +301,28 @@ nmap <Leader>r :Startify<CR>
 let g:startify_list_order = ['dir', 'files', 'bookmarks', 'sessions', 'commands']
 let g:startify_change_to_dir = 0
 let g:startify_custom_header = []
+" Make directory
+command MakeDirectory :silent !mkdir -p %:h
+" Snippets
+let g:UltiSnipsJumpBackwardTrigger="<C-z>"
+let g:UltiSnipsJumpForwardTrigger="<C-q>"
+" Wrap lines in Quickfix
+augroup quickfix
+  autocmd!
+  autocmd FileType qf setlocal wrap
+augroup END
+" Scratch
+let g:scratch_no_mappings = 1
+nmap <leader>si <plug>(scratch-insert-reuse)
+xmap <leader>si <plug>(scratch-selection-reuse)
+nmap <leader>sp :ScratchPreview<CR>
+nmap <leader>se :Scratch<CR>
+" Angular
+" autocmd FileType typescript JsPreTmpl html
+" autocmd FileType typescript syn clear foldBraces
+" Javascript
+let g:javascript_plugin_jsdoc=1
+autocmd FileType javascript.jsx,javascript setlocal formatprg=prettier\ --stdin\ --print-width\ 100\ --single-quote
+autocmd BufWritePre *.js Neoformat
+let g:neoformat_javascript_prettier = {
+  \ 'exe': 'prettier', 'args': ['--stdin', '--single-quote', '--print-width 100'], 'stdin': 1 }

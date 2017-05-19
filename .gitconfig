@@ -1,41 +1,40 @@
 [alias]
-	st = status
+  c = commit
+  lg = log -p
+  st = status
   co = checkout
+  tree = log --color --graph --pretty=format:'%C(dim white)%h%Creset -%C(magenta)%d%Creset %s %Cgreen(%cr) %C(bold blue)%an%Creset' --abbrev-commit --
 [user]
-	name =
-	email =
+  name = David Sargeant
+  email = david@dsargeant.com
 [core]
-	editor = vim
-	excludesfile = ~/.gitignore_global
+  editor = nvim
+  excludesfile = /Users/dsargeant/.gitignore_global
   autocrlf = input
+  pager = diff-so-fancy | less --tabs=4 -RFX
 [push]
-	default = current
+  default = current
 [filter "lfs"]
-	clean = git lfs clean %f
-	smudge = git lfs smudge %f
-	required = true
+  clean = git lfs clean %f
+  smudge = git lfs smudge %f
+  required = true
 [credential]
-	helper = store
+  helper = store
 [mergetool]
-	keepBackup = false
-	prompt = false
+  keepBackup = false
+  prompt = false
 [mergetool "Kaleidoscope"]
-	cmd = ksdiff --merge --output \"$MERGED\" --base \"$BASE\" -- \"$LOCAL\" --snapshot \"$REMOTE\" --snapshot
-	trustexitcode = true
+  cmd = ksdiff --merge --output \"$MERGED\" --base \"$BASE\" -- \"$LOCAL\" --snapshot \"$REMOTE\" --snapshot
+  trustexitcode = true
 [merge]
-	tool = Kaleidoscope
+  tool = Kaleidoscope
 [difftool "Kaleidoscope"]
-	cmd = ksdiff --partial-changeset --relative-path \"$MERGED\" -- \"$LOCAL\" \"$REMOTE\"
+  cmd = ksdiff --partial-changeset --relative-path \"$MERGED\" -- \"$LOCAL\" \"$REMOTE\"
 [difftool]
-	prompt = false
+  prompt = false
 [diff]
-	tool = Kaleidoscope
-[difftool "sourcetree"]
-	cmd = /usr/local/bin/ksdiff -w \"$LOCAL\" \"$REMOTE\"
-	path =
-[mergetool "sourcetree"]
-	cmd = /usr/local/bin/ksdiff --merge --output \"$MERGED\" --base \"$BASE\" -- \"$LOCAL\" --snapshot \"$REMOTE\" --snapshot
-	trustExitCode = true
+  tool = Kaleidoscope
 [branch]
-	autoSetupMerge = always
-
+  autoSetupMerge = always
+[commit]
+  template = /Users/dsargeant/.stCommitMsg
