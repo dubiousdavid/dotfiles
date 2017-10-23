@@ -33,6 +33,8 @@ export MANPAGER="nvim -c 'set ft=man' -"
 # Go
 export GOPATH=$PROJ/Go
 export PATH=$PATH:$GOPATH/bin:/usr/local/go/bin
+# Swift
+export PATH=$PATH:/Library/Developer/Toolchains/swift-latest.xctoolchain/usr/bin
 # FZF
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 export FZF_DEFAULT_COMMAND="ag -f -U --hidden -g ''"
@@ -106,7 +108,7 @@ rc(){
     zsh) v ~/.zshrc ;;
     vim) v ~/.config/nvim/init.vim ;;
     emacs) e ~/.emacs.d/init.el ;;
-    clojure) e ~/.lein/profiles.clj ;;
+    clojure) v ~/.lein/profiles.clj ;;
   esac
 }
 
@@ -129,7 +131,7 @@ build-docs() {
   [ $containerId ] && echo "Stopping api-docs ($containerId)" && docker stop $containerId 1>/dev/null
   cd "$PROJ/BoomTownROI/api-docs"
   docker build -t boomtown/api-docs .
-  api-docs
+  start-docs
 }
 
 # Start API docs
@@ -217,7 +219,7 @@ current-branch() {
   git rev-parse --abbrev-ref HEAD
 }
 
-push-current() {
+gup() {
   git push -u origin "$(current-branch)"
 }
 
@@ -247,4 +249,8 @@ serve() {
 
 mongo() {
   docker run -d -p 27017:27017 mongo
+}
+
+reverse() {
+  echo $1 | rev
 }

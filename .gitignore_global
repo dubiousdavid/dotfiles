@@ -10,3 +10,4 @@ Thumbs.db
 *.iml
 .agignore
 .tern-port
+.idea
