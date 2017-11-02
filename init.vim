@@ -24,14 +24,10 @@ Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-surround'
 " Motions for adding/removing comments
 Plug 'tomtom/tcomment_vim'
-" Rainbow delimiters
-Plug 'luochen1990/rainbow'
 " Auto-close parens
 Plug 'cohama/lexima.vim'
 " Duplicate lines and visual selection
 Plug 'timkendrick/vim-duplicate'
-" Display search count
-" Plug 'henrik/vim-indexed-search'
 " Motions for function arguments
 Plug 'b4winckler/vim-angry'
 " Sort motion
@@ -47,23 +43,13 @@ Plug 'wincent/ferret'
 " Scratch
 Plug 'mtth/scratch.vim'
 " Formatter
-Plug 'sbdchd/neoformat'
-" Auto completion
-" Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+" Plug 'sbdchd/neoformat'
 " Flow
 Plug 'flowtype/vim-flow', {'for': 'javascript'}
-" Auto completion for Go
-Plug 'nsf/gocode', {'for': 'go', 'rtp': 'nvim', 'do': '~/.config/nvim/plugged/gocode/nvim/symlink.sh'}
-" Go syntax highlighting, jump-to-definition, gofmt
-Plug 'fatih/vim-go', {'for': 'go'}
 " Extend % matching
-Plug 'matchit.zip', {'for': ['html', 'xml', 'sh', 'vim']}
+Plug 'vim-scripts/matchit.zip', {'for': ['html', 'xml', 'sh', 'vim']}
 " Rust
 Plug 'rust-lang/rust.vim', {'for': 'rust'}
-" Scala
-" Plug 'ensime/ensime-vim', {'for': 'scala', 'do': ':UpdateRemotePlugins'}
-Plug 'ensime/ensime-vim', {'for': 'scala', 'commit': '1b32e85f5c1883af3946cf2bf7a39f60801f47b1'}
-Plug 'derekwyatt/vim-scala', {'for': ['scala', 'sbt.scala']}
 " VCL
 Plug 'smerrill/vcl-vim-plugin', {'for': 'vcl'}
 " TOML
@@ -72,8 +58,6 @@ Plug 'cespare/vim-toml', {'for': 'toml'}
 Plug 'othree/html5.vim', {'for': ['html', 'xml']}
 " Keybindings for closing tags
 Plug 'tpope/vim-ragtag', {'for': ['javascript', 'html', 'xml']}
-" Format Javascript
-Plug 'maksimr/vim-jsbeautify', {'for': ['html', 'xml', 'css', 'json']}
 " Javascript (ES6)
 Plug 'pangloss/vim-javascript', {'for': 'javascript'}
 " JSX
@@ -81,9 +65,7 @@ Plug 'mxw/vim-jsx', {'for': 'javascript'}
 " Snippets engine
 Plug 'SirVer/ultisnips'
 " Actual snippets
-" Plug 'honza/vim-snippets'
-" Plug 'dubiousdavid/vim-snippets'
-Plug '~/Projects/Clojure/vim-snippets'
+Plug 'honza/vim-snippets'
 " Clojure
 Plug 'tpope/vim-fireplace', {'for': 'clojure'}
 Plug 'guns/vim-sexp', {'for': 'clojure'}
@@ -91,26 +73,18 @@ Plug 'guns/vim-sexp', {'for': 'clojure'}
 Plug 'clojure-vim/async-clj-omni', {'for': 'clojure'}
 " Autocompletion
 Plug 'roxma/nvim-completion-manager'
-" F#
-" Plug 'scrooloose/syntastic', {'for': 'fsharp'}
-" Plug 'ervandew/supertab', {'for': 'fsharp'}
-" Plug 'fsharp/vim-fsharp', {'for': 'fsharp', 'do': 'make fsautocomplete'}
-" Elm
-" Plug 'ElmCast/elm-vim', {'for': 'elm'}
-" Typescript
-" Plug 'leafgarland/typescript-vim', {'for': 'typescript'}
-" Plug 'Quramy/tsuquyomi', {'for': 'typescript', 'do': 'make -f make_mac.mak'}
-" Plug 'Shougo/vimproc.vim', {'do' : 'make'}
-" Plug 'mhartington/nvim-typescript', {'for': 'typescript'}
 " GraphQL
 Plug 'jparise/vim-graphql', {'for': 'graphql'}
-" Swift
-Plug 'apple/swift', {'rtp': 'utils/vim', 'for': 'swift'}
+" Prettier
+Plug 'prettier/vim-prettier', {
+  \ 'do': 'npm install',
+  \ 'for': ['javascript', 'typescript', 'css', 'less', 'scss', 'json', 'graphql'] }
+" Linting
+Plug 'w0rp/ale', {'for': ['javascript', 'typescript', 'css', 'less', 'scss', 'json', 'graphql']}
 call plug#end()
 " Color theme
 colorscheme tir_black
-" Show replacement inline (kind of broken)
-" set inccommand=nosplit
+set termguicolors
 " Don't show mode below statusline
 set noshowmode
 " Allow navigation away from modified buffers
@@ -162,8 +136,6 @@ let mapleader=','
 let maplocalleader=','
 " Enable edn filetype detection
 au BufNewFile,BufRead *.edn setlocal filetype=clojure
-" Enable sc filetype detection
-au BufNewFile,BufRead *.sc setlocal filetype=scala
 " Enable .babelrc filetype detection
 au BufNewFile,BufRead .babelrc setlocal filetype=json
 " HTML autocompletion
@@ -186,9 +158,6 @@ endif
 let g:airline_symbols.readonly='RO'
 let g:airline_symbols.linenr = ''
 let g:airline_symbols.maxlinenr = ''
-" Quickly edit/reload configuration file
-" nnoremap gev :e $MYVIMRC<CR>
-" nnoremap gsv :so $MYVIMRC<CR>
 " Horizontal split
 nmap _ :sp<CR>
 " Backspace closes buffer
@@ -226,42 +195,9 @@ map <Leader>c <Plug>(easymotion-s)
 map <Leader>w <Plug>(easymotion-bd-w)
 nmap <Leader>w <Plug>(easymotion-overwin-w)
 map <Leader>W <Plug>(easymotion-bd-W)
-" Rainbow
-let g:rainbow_active=1
-let g:rainbow_conf={'ctermfgs': ['darkgray', 'gray'], 'separately': {'html': {}}}
-au FileType sh call rainbow#clear()
 " FZF
 nmap <Leader>f :Files<CR>
 nmap <Leader>b :Buffers<CR>
-" Clojure
-let g:clojure_syntax_keywords={'clojureDefine': ['defn$','defna','defnv'], 'clojureSpecial': ['fn$','fna','fnv']}
-au FileType clojure nmap <buffer> <silent> <Leader>j <Plug>FireplaceDjump
-au FileType clojure nmap <buffer> <Leader>k :Require<CR>
-let g:sexp_insert_after_wrap=0
-let g:sexp_mappings = {
-      \ 'sexp_round_head_wrap_list':      '',
-      \ 'sexp_round_tail_wrap_list':      '',
-      \ 'sexp_square_head_wrap_list':     '',
-      \ 'sexp_square_tail_wrap_list':     '',
-      \ 'sexp_curly_head_wrap_list':      '',
-      \ 'sexp_curly_tail_wrap_list':      '',
-      \ 'sexp_round_head_wrap_element':   '<LocalLeader>(',
-      \ 'sexp_round_tail_wrap_element':   '<LocalLeader>)',
-      \ 'sexp_square_head_wrap_element':  '<LocalLeader>[',
-      \ 'sexp_square_tail_wrap_element':  '<LocalLeader>]',
-      \ 'sexp_curly_head_wrap_element':   '<LocalLeader>{',
-      \ 'sexp_curly_tail_wrap_element':   '<LocalLeader>}',
-      \ 'sexp_insert_at_list_head':       '',
-      \ 'sexp_insert_at_list_tail':       '',
-      \ 'sexp_splice_list':               '<LocalLeader>@',
-      \ 'sexp_convolute':                 '<LocalLeader>?',
-      \ 'sexp_raise_list':                '',
-      \ 'sexp_raise_element':             '<LocalLeader>^',
-      \ 'sexp_move_to_prev_element_head': '{',
-      \ 'sexp_move_to_next_element_head': '}',
-      \ 'sexp_swap_list_backward':        '',
-      \ 'sexp_swap_list_forward':         '',
-      \ }
 " Ag
 function! s:Ag(term)
   execute 'te ag --pager=less ' . a:term
@@ -290,51 +226,14 @@ nmap <Leader>O O<Esc>
 let g:netrw_liststyle = 3
 " Display full path of current file
 nmap <Leader>n :echo expand('%:p')<CR>
-" Ensime
-au FileType scala nmap <buffer> <silent> <Leader>j :EnDeclaration<CR>
-au FileType scala nmap <buffer> <silent> <Leader>t :EnType<CR>
-au FileType scala nmap <buffer> <silent> <Leader>T :EnTypeCheck<CR>
-au FileType scala nmap <buffer> <silent> <Leader>i :EnInspectType<CR>
-au FileType scala nmap <buffer> <silent> <Leader>l :EnDocBrowse<CR>
-au FileType scala nmap <buffer> <silent> <Leader>x :EnRename<CR>
-" Go
-au FileType go nmap <buffer> <silent> <Leader>j <Plug>(go-def)
-au FileType go nmap <buffer> <silent> <Leader>t <Plug>(go-info)
-au FileType go nmap <buffer> <silent> <Leader>l <Plug>(go-doc)
-au FileType go nmap <buffer> <silent> <Leader>x <Plug>(go-rename)
-let g:go_highlight_build_constraints = 1
-let g:go_highlight_extra_types = 1
-let g:go_highlight_fields = 1
-let g:go_highlight_functions = 1
-let g:go_highlight_methods = 1
-let g:go_highlight_operators = 1
-let g:go_highlight_structs = 1
-let g:go_highlight_types = 1
-let g:go_auto_type_info = 1
 " Javascript
 au FileType javascript nmap <buffer> <silent> <Leader>j :FlowJumpToDef<CR>
 au FileType javascript nmap <buffer> <silent> <Leader>t :FlowType<CR>
-" Typescript
-au FileType typescript nmap <buffer> <silent> <Leader>j :TsuDefinition<CR>
-au FileType typescript nmap <buffer> <silent> <Leader>i :TsuImport<CR>
-au FileType typescript nmap <buffer> <silent> <Leader>t : <C-u>echo tsuquyomi#hint()<CR>
-au FileType typescript nmap <buffer> <silent> <Leader>x <Plug>(TsuquyomiRenameSymbol)
-let g:tsuquyomi_completion_detail = 1
-" XML
-au FileType xml nmap <buffer> <silent> <Leader>xc :!xmllint --noout %<CR>
-" Save window position when changing buffers
-au BufLeave * let b:winview = winsaveview()
-au BufEnter * if(exists('b:winview')) | call winrestview(b:winview) | endif
-" Format
-autocmd FileType json noremap <buffer> <c-f> :call JsonBeautify()<cr>
-autocmd FileType html noremap <buffer> <c-f> :call HtmlBeautify()<cr>
-autocmd FileType xml noremap <buffer> <c-f> :call HtmlBeautify()<cr>
-autocmd FileType css noremap <buffer> <c-f> :call CSSBeautify()<cr>
 " Sort (case insensitive)
 let g:sort_motion_flags = "i"
 " JSX
 let g:jsx_ext_required = 0
-" Startify
+" Startify (start screen)
 nmap <Leader>r :Startify<CR>
 let g:startify_list_order = ['dir', 'files', 'bookmarks', 'sessions', 'commands']
 let g:startify_change_to_dir = 0
@@ -357,17 +256,28 @@ nmap <leader>sp :ScratchPreview<CR>
 nmap <leader>se :Scratch<CR>
 " Javascript
 let g:javascript_plugin_jsdoc=1
-autocmd FileType javascript.jsx,javascript setlocal formatprg=prettier\ --stdin\ --print-width\ 100\ --single-quote
-autocmd BufWritePre *.js Neoformat
-let g:neoformat_javascript_prettier = {
-  \ 'exe': 'prettier', 'args': ['--stdin', '--single-quote', '--print-width 100'], 'stdin': 1 }
+" Prettier
+let g:prettier#autoformat = 0
+autocmd BufWritePre *.js,*.jsx,*.mjs,*.ts,*.tsx,*.css,*.less,*.scss,*.json,*.graphql Prettier
+" max line length that prettier will wrap on
+let g:prettier#config#print_width = 80
+" number of spaces per indentation level
+let g:prettier#config#tab_width = 2
+" use tabs over spaces
+let g:prettier#config#use_tabs = 'true'
+" print semicolons
+let g:prettier#config#semi = 'false'
+" single quotes over double quotes
+let g:prettier#config#single_quote = 'true'
+" print spaces between brackets
+let g:prettier#config#bracket_spacing = 'false'
+" put > on the last line instead of new line
+let g:prettier#config#jsx_bracket_same_line = 'false'
+" none|es5|all
+let g:prettier#config#trailing_comma = 'es5'
+" flow|babylon|typescript|postcss|json|graphql
+let g:prettier#config#parser = 'babylon'
+" cli-override|file-override|prefer-file
+let g:prettier#config#config_precedence = 'prefer-file'
 " Flow
 let g:flow#autoclose=1
-" Use locally installed flow
-let local_flow = finddir('node_modules', '.;') . '/.bin/flow'
-if matchstr(local_flow, "^\/\\w") == ''
-  let local_flow= getcwd() . "/" . local_flow
-endif
-if executable(local_flow)
-  let g:flow#flowpath = local_flow
-endif
