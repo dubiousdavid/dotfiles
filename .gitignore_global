@@ -9,5 +9,7 @@ Thumbs.db
 .ensime_cache
 *.iml
 .agignore
+.ignore
 .tern-port
 .idea
+.flowconfig

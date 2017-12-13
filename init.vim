@@ -73,6 +73,7 @@ Plug 'guns/vim-sexp', {'for': 'clojure'}
 Plug 'clojure-vim/async-clj-omni', {'for': 'clojure'}
 " Autocompletion
 Plug 'roxma/nvim-completion-manager'
+Plug 'calebeby/ncm-css', {'for': ['css', 'less', 'scss']}
 " GraphQL
 Plug 'jparise/vim-graphql', {'for': 'graphql'}
 " Prettier
@@ -198,12 +199,15 @@ map <Leader>W <Plug>(easymotion-bd-W)
 " FZF
 nmap <Leader>f :Files<CR>
 nmap <Leader>b :Buffers<CR>
-" Ag
-function! s:Ag(term)
-  execute 'te ag --pager=less ' . a:term
+" Search
+function! s:Search(term)
+  execute 'terminal rg -M 100 -p -S --no-ignore-vcs --hidden ' . a:term . ' | less -XFR'
 endfunction
-command! -nargs=1 Ag call s:Ag(<f-args>)
-nmap <Leader>a :Ag<Space>
+command! -nargs=1 Search call s:Search(<f-args>)
+nmap <Leader>s :Search<Space>
+" Set grep program to rg
+set grepprg=rg\ --vimgrep
+set grepformat^=%f:%l:%c:%m
 " Git
 nmap <Leader>gh :Gbrowse<CR>
 vmap <Leader>gh :Gbrowse<CR>
@@ -215,7 +219,7 @@ nmap <Leader>gl :terminal git tree<CR>
 nmap <Leader>gg :Ggrep<Space>
 nmap <Leader>ge :Gedit<Space>
 nmap <Leader>gf :!git fetch<CR>
-nmap <Leader>gF :!git pull<CR>
+nmap <Leader>gP :!git pull<CR>
 nmap <Leader>gp :!git push<CR>
 nmap <Leader>gup :!git push -u origin $(git rev-parse --abbrev-ref HEAD)<CR>
 nmap <Leader>gn :GitGutterNextHunk<CR>
@@ -250,15 +254,11 @@ augroup quickfix
 augroup END
 " Scratch
 let g:scratch_no_mappings = 1
-nmap <leader>si <plug>(scratch-insert-reuse)
-xmap <leader>si <plug>(scratch-selection-reuse)
-nmap <leader>sp :ScratchPreview<CR>
-nmap <leader>se :Scratch<CR>
 " Javascript
 let g:javascript_plugin_jsdoc=1
 " Prettier
 let g:prettier#autoformat = 0
-autocmd BufWritePre *.js,*.jsx,*.mjs,*.ts,*.tsx,*.css,*.less,*.scss,*.json,*.graphql Prettier
+" autocmd BufWritePre *.js,*.jsx,*.mjs,*.ts,*.tsx,*.css,*.less,*.scss,*.json,*.graphql Prettier
 " max line length that prettier will wrap on
 let g:prettier#config#print_width = 80
 " number of spaces per indentation level
@@ -281,3 +281,6 @@ let g:prettier#config#parser = 'babylon'
 let g:prettier#config#config_precedence = 'prefer-file'
 " Flow
 let g:flow#autoclose=1
+" Ale
+nmap <silent> <C-p> <Plug>(ale_previous_wrap)
+nmap <silent> <C-n> <Plug>(ale_next_wrap)

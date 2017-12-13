@@ -1,6 +1,5 @@
 cp ~/.config/nvim/init.vim .
 cp ~/.zshrc .
 cp ~/.config/nvim/colors/tir_black.vim colors/tir_black.vim
-cp ~/.agignore .
 cp ~/.gitignore_global .
 cp ~/.gitconfig .

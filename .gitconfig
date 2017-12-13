@@ -9,9 +9,9 @@
   email = david@dsargeant.com
 [core]
   editor = nvim
-  excludesfile = /Users/dsargeant/.gitignore_global
+  excludesfile = /Users/davidsargeant/.gitignore_global
   autocrlf = input
-  pager = diff-so-fancy | less --tabs=4 -RFX
+	pager = diff-so-fancy | less --tabs=4 -RFX
 [push]
   default = current
 [filter "lfs"]
@@ -36,5 +36,3 @@
   tool = Kaleidoscope
 [branch]
   autoSetupMerge = always
-[commit]
-  template = /Users/dsargeant/.stCommitMsg
