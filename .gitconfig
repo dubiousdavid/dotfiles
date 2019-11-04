@@ -1,6 +1,5 @@
 [alias]
-  c = commit
-  lg = log -p
+  lg = log --follow -p --
   st = status
   co = checkout
   tree = log --color --graph --pretty=format:'%C(dim white)%h%Creset -%C(magenta)%d%Creset %s %Cgreen(%cr) %C(bold blue)%an%Creset' --abbrev-commit --

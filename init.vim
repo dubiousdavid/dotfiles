@@ -25,7 +25,7 @@ Plug 'tpope/vim-surround'
 " Motions for adding/removing comments
 Plug 'tomtom/tcomment_vim'
 " Auto-close parens
-Plug 'cohama/lexima.vim'
+Plug 'jiangmiao/auto-pairs'
 " Duplicate lines and visual selection
 Plug 'timkendrick/vim-duplicate'
 " Motions for function arguments
@@ -39,11 +39,9 @@ Plug 'mhinz/vim-startify'
 " File commands
 Plug 'tpope/vim-eunuch'
 " Ack, find and replace
-Plug 'wincent/ferret'
+" Plug 'wincent/ferret'
 " Scratch
-Plug 'mtth/scratch.vim'
-" Formatter
-" Plug 'sbdchd/neoformat'
+" Plug 'mtth/scratch.vim'
 " Flow
 Plug 'flowtype/vim-flow', {'for': 'javascript'}
 " Extend % matching
@@ -69,11 +67,14 @@ Plug 'honza/vim-snippets'
 " Clojure
 Plug 'tpope/vim-fireplace', {'for': 'clojure'}
 Plug 'guns/vim-sexp', {'for': 'clojure'}
-" Plug 'guns/vim-clojure-static', {'for': 'clojure'}
-Plug 'clojure-vim/async-clj-omni', {'for': 'clojure'}
+" Plug 'tpope/vim-sexp-mappings-for-regular-people', {'for': 'clojure'}
 " Autocompletion
-Plug 'roxma/nvim-completion-manager'
+Plug 'ncm2/ncm2'
+Plug 'roxma/nvim-yarp'
+Plug 'ncm2/ncm2-bufword'
+Plug 'ncm2/ncm2-path'
 Plug 'calebeby/ncm-css', {'for': ['css', 'less', 'scss']}
+Plug 'clojure-vim/async-clj-omni', {'for': 'clojure'}
 " GraphQL
 Plug 'jparise/vim-graphql', {'for': 'graphql'}
 " Prettier
@@ -82,6 +83,11 @@ Plug 'prettier/vim-prettier', {
   \ 'for': ['javascript', 'typescript', 'css', 'less', 'scss', 'json', 'graphql'] }
 " Linting
 Plug 'w0rp/ale', {'for': ['javascript', 'typescript', 'css', 'less', 'scss', 'json', 'graphql']}
+" Notes
+Plug 'https://github.com/alok/notational-fzf-vim'
+Plug 'junegunn/goyo.vim'
+" Search highlighting
+" Plug 'pgdouyon/vim-evanesco'
 call plug#end()
 " Color theme
 colorscheme tir_black
@@ -125,7 +131,9 @@ set wildignore+=node_modules/*,bower_components/*
 " Enable mouse in all modes
 set mouse=a
 " Omnicomplete
-set completeopt=longest,menuone,preview
+" set completeopt=longest,menuone,preview
+" IMPORTANT: :help Ncm2PopupOpen for more information
+set completeopt=noinsert,menuone,noselect
 set omnifunc=syntaxcomplete#Complete
 " List
 set listchars+=space:.
@@ -147,7 +155,7 @@ tnoremap <A-2> <C-\><C-n><C-w>j
 tnoremap <A-1> <C-\><C-n><C-w>k
 nnoremap <A-2> <C-w>j
 nnoremap <A-1> <C-w>k
-autocmd BufWinEnter,WinEnter term://* startinsert
+autocmd BufEnter term://* startinsert
 " vim-airline
 set laststatus=2
 let g:airline_theme='murmur'
@@ -187,10 +195,38 @@ vnoremap > >gv
 nnoremap Y y$
 " Entire file
 onoremap af :<C-u>normal! ggVG<CR>
+" vim-sexp
+let g:sexp_filetypes = ''
+function! s:vim_sexp_mappings()
+  nmap <silent><buffer> (               <Plug>(sexp_move_to_prev_bracket)
+  xmap <silent><buffer> (               <Plug>(sexp_move_to_prev_bracket)
+  omap <silent><buffer> (               <Plug>(sexp_move_to_prev_bracket)
+  nmap <silent><buffer> )               <Plug>(sexp_move_to_next_bracket)
+  xmap <silent><buffer> )               <Plug>(sexp_move_to_next_bracket)
+  omap <silent><buffer> )               <Plug>(sexp_move_to_next_bracket)
+  nmap <silent><buffer> [[              <Plug>(sexp_move_to_prev_top_element)
+  xmap <silent><buffer> [[              <Plug>(sexp_move_to_prev_top_element)
+  omap <silent><buffer> [[              <Plug>(sexp_move_to_prev_top_element)
+  nmap <silent><buffer> ]]              <Plug>(sexp_move_to_next_top_element)
+  xmap <silent><buffer> ]]              <Plug>(sexp_move_to_next_top_element)
+  omap <silent><buffer> ]]              <Plug>(sexp_move_to_next_top_element)
+  nmap <silent><buffer> [e              <Plug>(sexp_select_prev_element)
+  xmap <silent><buffer> [e              <Plug>(sexp_select_prev_element)
+  omap <silent><buffer> [e              <Plug>(sexp_select_prev_element)
+  nmap <silent><buffer> ]e              <Plug>(sexp_select_next_element)
+  xmap <silent><buffer> ]e              <Plug>(sexp_select_next_element)
+  omap <silent><buffer> ]e              <Plug>(sexp_select_next_element)
+  nmap <silent><buffer> ==              <Plug>(sexp_indent)
+  nmap <silent><buffer> =-              <Plug>(sexp_indent_top)
+endfunction
+augroup VIM_SEXP_MAPPING
+  autocmd!
+  autocmd FileType clojure,scheme,lisp,timl call s:vim_sexp_mappings()
+augroup END
 " Strip trailing whitespace
-let g:strip_whitespace_on_save=1
+" let g:strip_whitespace_on_save=1
 " Don't highlight trailing whitespace
-let g:better_whitespace_enabled=0
+" let g:better_whitespace_enabled=0
 " Easy Motion
 map <Leader>c <Plug>(easymotion-s)
 map <Leader>w <Plug>(easymotion-bd-w)
@@ -201,7 +237,8 @@ nmap <Leader>f :Files<CR>
 nmap <Leader>b :Buffers<CR>
 " Search
 function! s:Search(term)
-  execute 'terminal rg -M 100 -p -S --no-ignore-vcs --hidden ' . a:term . ' | less -XFR'
+  execute 'terminal rg -M 125 -p -S --no-ignore-vcs --hidden ' . a:term . ' | less -XFR'
+  execute 'startinsert'
 endfunction
 command! -nargs=1 Search call s:Search(<f-args>)
 nmap <Leader>s :Search<Space>
@@ -253,7 +290,7 @@ augroup quickfix
   autocmd FileType qf setlocal wrap
 augroup END
 " Scratch
-let g:scratch_no_mappings = 1
+" let g:scratch_no_mappings = 1
 " Javascript
 let g:javascript_plugin_jsdoc=1
 " Prettier
@@ -264,17 +301,17 @@ let g:prettier#config#print_width = 80
 " number of spaces per indentation level
 let g:prettier#config#tab_width = 2
 " use tabs over spaces
-let g:prettier#config#use_tabs = 'true'
+" let g:prettier#config#use_tabs = 'true'
 " print semicolons
 let g:prettier#config#semi = 'false'
 " single quotes over double quotes
 let g:prettier#config#single_quote = 'true'
 " print spaces between brackets
-let g:prettier#config#bracket_spacing = 'false'
+let g:prettier#config#bracket_spacing = 'true'
 " put > on the last line instead of new line
 let g:prettier#config#jsx_bracket_same_line = 'false'
 " none|es5|all
-let g:prettier#config#trailing_comma = 'es5'
+let g:prettier#config#trailing_comma = 'all'
 " flow|babylon|typescript|postcss|json|graphql
 let g:prettier#config#parser = 'babylon'
 " cli-override|file-override|prefer-file
@@ -284,3 +321,13 @@ let g:flow#autoclose=1
 " Ale
 nmap <silent> <C-p> <Plug>(ale_previous_wrap)
 nmap <silent> <C-n> <Plug>(ale_next_wrap)
+" ncm2
+" enable ncm2 for all buffers
+autocmd BufEnter * call ncm2#enable_for_buffer()
+" Notes
+let g:nv_search_paths = ['~/Dropbox/Notes']
+let g:nv_create_note_window = 'edit'
+let g:goyo_width = 60
+nmap <Leader>e :Goyo <BAR> NV<CR>
+" MJML
+autocmd BufEnter *.mjml setlocal filetype=xml

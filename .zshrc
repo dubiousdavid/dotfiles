@@ -3,30 +3,25 @@ export ZSH=$HOME/.oh-my-zsh
 # Theme
 ZSH_THEME="david"
 # Plugins
-plugins=(urltools aws docker)
+plugins=(urltools docker)
 # Path
-export PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$HOME/bin:/usr/local/sbin
-export NODE_PATH=/usr/local/lib/node_modules
-
+export PATH=$HOME/bin:/usr/local/opt/python/libexec/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/sbin
+# zsh
 source $ZSH/oh-my-zsh.sh
 
 export EDITOR=nvim
 export PROJ=~/Projects
 export BROWSER="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 # Aliases
-alias c=clear
 alias g=git
 alias v=nvim
-alias dk=docker
 alias reload="source ~/.zshrc"
 alias sed="sed -E"
 alias ports="lsof -iTCP -sTCP:LISTEN -n -P"
-alias b=bible
 alias jpp="jq '.'"
-alias dcomp=docker-compose
 alias sp="cd $PROJ/SmartProcure"
-# alias mongo="mongo --shell $PROJ/lodash.min.js"
-alias n=node
+alias cat="bat"
+alias find="fd"
 # Paging via Vim
 export MANPAGER="nvim -c 'set ft=man' -"
 # FZF
@@ -37,6 +32,7 @@ export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+export NODE_PATH=`npm root -g`
 # z (nice autocompletion of frequently used directories)
 source ~/Projects/z/z.sh
 
@@ -52,14 +48,14 @@ port() {
 }
 
 # Kill one or more ports
-kill-port() {
+port-kill() {
   if [ -z "$@" ]; then
     echo "Usage: kill-port [port # ...]"
   else
     port "$@" | awk 'NR!=1 {print $2}' | xargs kill
   fi
 }
-#
+
 # Change projects
 proj() {
   cd $PROJ/$1
@@ -80,17 +76,6 @@ dh() {
   local dir
   dir=$(z | sed 's/^[0-9.]*[[:space:]]*//' | fzf --tac --no-sort)
   cd "$dir"
-}
-
-# Search the Bible
-bible() {
-  if [ -z "$*" ]; then
-    http --body "http://www.esvapi.org/v2/rest/dailyVerse?key=IP&output-format=plain-text"
-  else
-    local passage
-    passage=$(urlencode "$*")
-    http --body "http://www.esvapi.org/v2/rest/passageQuery?key=IP&output-format=plain-text&passage=$passage"
-  fi
 }
 
 # Edit an rc file
@@ -150,6 +135,18 @@ reverse() {
   echo $1 | rev
 }
 
+# Search with rip grep
 s() {
-  rg -M 100 -p -S --no-ignore-vcs --hidden "$@" | less -XFR
+  rg -M 125 -p -S --no-ignore-vcs --hidden "$@" | less -XFR
+}
+
+rm-swp() {
+  find . -type f -name "*.sw[klmnop]" -delete
+}
+
+py() {
+  case $1 in
+    2) ln -s /usr/bin/python $HOME/bin/python ;;
+    3) rm $HOME/bin/python ;;
+  esac
 }
