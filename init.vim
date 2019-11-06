@@ -67,7 +67,6 @@ Plug 'honza/vim-snippets'
 " Clojure
 Plug 'tpope/vim-fireplace', {'for': 'clojure'}
 Plug 'guns/vim-sexp', {'for': 'clojure'}
-" Plug 'tpope/vim-sexp-mappings-for-regular-people', {'for': 'clojure'}
 " Autocompletion
 Plug 'ncm2/ncm2'
 Plug 'roxma/nvim-yarp'
@@ -82,12 +81,10 @@ Plug 'prettier/vim-prettier', {
   \ 'do': 'npm install',
   \ 'for': ['javascript', 'typescript', 'css', 'less', 'scss', 'json', 'graphql'] }
 " Linting
-Plug 'w0rp/ale', {'for': ['javascript', 'typescript', 'css', 'less', 'scss', 'json', 'graphql']}
+Plug 'dense-analysis/ale', {'for': ['javascript', 'typescript', 'css', 'less', 'scss', 'json', 'graphql']}
 " Notes
 Plug 'https://github.com/alok/notational-fzf-vim'
 Plug 'junegunn/goyo.vim'
-" Search highlighting
-" Plug 'pgdouyon/vim-evanesco'
 call plug#end()
 " Color theme
 colorscheme tir_black
