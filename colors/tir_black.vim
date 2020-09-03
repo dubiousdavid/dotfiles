@@ -134,3 +134,7 @@ highlight DiffAdd cterm=none ctermfg=fg ctermbg=DarkGreen gui=none guifg=fg guib
 highlight DiffDelete cterm=none ctermfg=fg ctermbg=DarkRed gui=none guifg=fg guibg=DarkRed
 highlight DiffChange cterm=none ctermfg=fg ctermbg=DarkBlue gui=none guifg=fg guibg=DarkBlue
 highlight DiffText cterm=none ctermfg=bg ctermbg=White gui=none guifg=bg guibg=Yellow
+
+" Sign column
+highlight! link SignColumn LineNr
+hi link ALESignColumnWithErrors SignColumn

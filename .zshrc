@@ -2,19 +2,17 @@
 export ZSH=$HOME/.oh-my-zsh
 # Theme
 ZSH_THEME="david"
-# Plugins
-plugins=(urltools docker)
 # Path
 export PATH=$HOME/bin:/usr/local/opt/python/libexec/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/sbin
 # zsh
 source $ZSH/oh-my-zsh.sh
 
-export EDITOR=nvim
+export EDITOR=vim
 export PROJ=~/Projects
 export BROWSER="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 # Aliases
 alias g=git
-alias v=nvim
+alias v=vim
 alias reload="source ~/.zshrc"
 alias sed="sed -E"
 alias ports="lsof -iTCP -sTCP:LISTEN -n -P"
@@ -22,8 +20,9 @@ alias jpp="jq '.'"
 alias sp="cd $PROJ/SmartProcure"
 alias cat="bat"
 alias find="fd"
+alias branches="git for-each-ref --count=10 --sort=-committerdate refs/heads/ --format='%(refname:short)' | fzf | xargs git checkout"
 # Paging via Vim
-export MANPAGER="nvim -c 'set ft=man' -"
+export MANPAGER="/bin/sh -c \"col -b | vim --not-a-term -c 'set ft=man ts=8 nomod nolist noma' -\""
 # FZF
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 export FZF_DEFAULT_COMMAND='rg --no-ignore-vcs --hidden --files'
@@ -50,7 +49,7 @@ port() {
 # Kill one or more ports
 port-kill() {
   if [ -z "$@" ]; then
-    echo "Usage: kill-port [port # ...]"
+    echo "Usage: port-kill [port # ...]"
   else
     port "$@" | awk 'NR!=1 {print $2}' | xargs kill
   fi
@@ -82,7 +81,7 @@ dh() {
 rc(){
   case $1 in
     zsh) v ~/.zshrc ;;
-    vim) v ~/.config/nvim/init.vim ;;
+    vim) v ~/.vimrc ;;
     emacs) e ~/.emacs.d/init.el ;;
     clojure) v ~/.lein/profiles.clj ;;
   esac
@@ -149,4 +148,9 @@ py() {
     2) ln -s /usr/bin/python $HOME/bin/python ;;
     3) rm $HOME/bin/python ;;
   esac
+}
+
+# Host, keys
+redis-del-bulk() {
+  redis-cli -h "$1" --raw keys "$2" | xargs redis-cli -h "$1" del
 }
