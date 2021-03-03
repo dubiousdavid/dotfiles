@@ -19,7 +19,6 @@ alias ports="lsof -iTCP -sTCP:LISTEN -n -P"
 alias jpp="jq '.'"
 alias sp="cd $PROJ/SmartProcure"
 alias cat="bat"
-alias find="fd"
 alias branches="git for-each-ref --count=10 --sort=-committerdate refs/heads/ --format='%(refname:short)' | fzf | xargs git checkout"
 # Paging via Vim
 export MANPAGER="/bin/sh -c \"col -b | vim --not-a-term -c 'set ft=man ts=8 nomod nolist noma' -\""
@@ -150,7 +149,7 @@ py() {
   esac
 }
 
-# Host, keys
+# Arguments: host, keys
 redis-del-bulk() {
   redis-cli -h "$1" --raw keys "$2" | xargs redis-cli -h "$1" del
 }

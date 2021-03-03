@@ -7,11 +7,9 @@ Plug 'vim-airline/vim-airline-themes'
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
 " Word and character motions
- Plug 'easymotion/vim-easymotion'
+Plug 'easymotion/vim-easymotion'
 " Show git changes in gutter
 Plug 'airblade/vim-gitgutter'
-" Remove trailing whitespace
-Plug 'ntpeters/vim-better-whitespace'
 " Git integration
 Plug 'tpope/vim-fugitive'
 " Github integration
@@ -24,12 +22,12 @@ Plug 'tpope/vim-surround'
 Plug 'tomtom/tcomment_vim'
 " Auto-close parens
 Plug 'jiangmiao/auto-pairs'
-" " Duplicate lines and visual selection
+" Duplicate lines and visual selection
 Plug 'timkendrick/vim-duplicate'
-" " Motions for function arguments
+" Motions for function arguments
 Plug 'b4winckler/vim-angry'
 " Open file at last edit position
-Plug 'dietsche/vim-lastplace'
+Plug 'farmergreg/vim-lastplace'
 " Recent files (overrides start screen)
 Plug 'mhinz/vim-startify'
 " File commands
@@ -43,17 +41,21 @@ Plug 'yuezk/vim-js'
 Plug 'maxmellon/vim-jsx-pretty'
 " Clojure
 Plug 'tpope/vim-fireplace', {'for': 'clojure'}
+" Clojure formatting
+Plug 'venantius/vim-cljfmt', {'for': 'clojure'}
 " Autocompletion
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 " Prettier
 Plug 'prettier/vim-prettier', {
-  \ 'do': 'npm install',
-  \ 'for': ['javascript', 'typescript', 'css', 'less', 'scss', 'json', 'graphql'] }
-" Linting
-Plug 'dense-analysis/ale', {'for': ['javascript', 'typescript', 'css', 'less', 'scss', 'json', 'graphql']}
+  \ 'do': 'yarn install',
+  \ 'for': ['javascript', 'typescript', 'css', 'less', 'scss', 'json', 'graphql', 'markdown', 'vue', 'yaml', 'html'] }
+" Codeowners
+Plug 'rhysd/vim-syntax-codeowners'
 call plug#end()
 " Color theme
 colorscheme tir_black
+" Yank
+nmap Y y$
 " Don't show mode
 set noshowmode
 " set termguicolors
@@ -145,10 +147,6 @@ imap <C-b> <Left>
 " vnoremap > >gv
 " Entire file
 onoremap af :<C-u>normal! ggVG<CR>
-" Strip trailing whitespace
-let g:strip_whitespace_on_save=1
-" Don't highlight trailing whitespace
-let g:better_whitespace_enabled=0
 " Easy Motion
 map <Leader>c <Plug>(easymotion-s)
 map <Leader>w <Plug>(easymotion-bd-w)
@@ -159,11 +157,18 @@ nmap <Leader>f :Files<CR>
 nmap <Leader>b :Buffers<CR>
 nmap <Leader>h :History/<CR>
 " Search
-function! s:Search(term)
-  execute 'terminal rg -M 125 -p -S --no-ignore-vcs --hidden ' . a:term
+function s:Search(term)
+  execute 'terminal rg --fixed-strings --max-columns 125 --pretty --smart-case --no-ignore-vcs ' . a:term
 endfunction
-command! -nargs=1 Search call s:Search(<f-args>)
+command -nargs=1 Search call s:Search(<f-args>)
 nmap <Leader>s :Search<Space>
+" Search (with quickfix)
+function s:SearchWithQuickfix(term)
+  cgetexpr system('rg --vimgrep --fixed-strings --smart-case --no-ignore-vcs ' . a:term)
+  copen
+endfunction
+command -nargs=1 SearchWithQuickfix call s:SearchWithQuickfix(<f-args>)
+nmap <Leader>/ :SearchWithQuickfix<Space>
 " Set grep program to rg
 set grepprg=rg\ --vimgrep
 set grepformat^=%f:%l:%c:%m
@@ -178,9 +183,9 @@ nmap <Leader>gd :terminal git diff<CR>
 nmap <Leader>gl :BCommits!<CR>
 nmap <Leader>gg :Ggrep<Space>
 nmap <Leader>ge :Gedit<Space>
-nmap <Leader>gf :!git fetch<CR>
-nmap <Leader>gP :!git pull<CR>
-nmap <Leader>gp :!git push<CR>
+nmap <Leader>gf :Git fetch<CR>
+nmap <Leader>gP :Git pull<CR>
+nmap <Leader>gp :Git push<CR>
 nmap <Leader>gup :!git push -u origin $(git rev-parse --abbrev-ref HEAD)<CR>
 nmap <Leader>gn :GitGutterNextHunk<CR>
 " Open lines without changing to Insert mode
@@ -191,39 +196,29 @@ let g:netrw_liststyle = 3
 " Display full path of current file
 nmap <Leader>n :echo expand('%:p')<CR>
 " Javascript
-au FileType javascript nmap <buffer> <silent> <Leader>j :FlowJumpToDef<CR>
-au FileType javascript nmap <buffer> <silent> <Leader>t :FlowType<CR>
+" au FileType javascript nmap <buffer> <silent> <Leader>j :FlowJumpToDef<CR>
+au FileType javascript nmap <silent> <Leader>j <Plug>(coc-definition)
+au FileType javascript nmap <silent> gd <Plug>(coc-definition)
+au FileType javascript nmap <silent> gr <Plug>(coc-references)
+" Use K to show documentation in preview window.
+nnoremap <silent> K :call <SID>show_documentation()<CR>
+
+function! s:show_documentation()
+  if (index(['vim','help'], &filetype) >= 0)
+    execute 'h '.expand('<cword>')
+  elseif (coc#rpc#ready())
+    call CocActionAsync('doHover')
+  else
+    execute '!' . &keywordprg . " " . expand('<cword>')
+  endif
+endfunction
+" Symbol renaming.
+nmap <Leader>rn <Plug>(coc-rename)
 " Startify (start screen)
 nmap <Leader>r :Startify<CR>
 let g:startify_list_order = ['dir']
 let g:startify_change_to_dir = 0
 let g:startify_custom_header = []
-" Wrap lines in Quickfix
-" augroup quickfix
-"   autocmd!
-"   autocmd FileType qf setlocal wrap
-" augroup END
-" Prettier
-let g:prettier#autoformat = 0
-" autocmd BufWritePre *.js,*.jsx,*.mjs,*.ts,*.tsx,*.css,*.less,*.scss,*.json,*.graphql Prettier
-" max line length that prettier will wrap on
-let g:prettier#config#print_width = 80
-" number of spaces per indentation level
-let g:prettier#config#tab_width = 2
-" print semicolons
-let g:prettier#config#semi = 'false'
-" single quotes over double quotes
-let g:prettier#config#single_quote = 'true'
-" print spaces between brackets
-let g:prettier#config#bracket_spacing = 'true'
-" put > on the last line instead of new line
-let g:prettier#config#jsx_bracket_same_line = 'false'
-" none|es5|all
-let g:prettier#config#trailing_comma = 'all'
-" flow|babylon|typescript|postcss|json|graphql
-let g:prettier#config#parser = 'babylon'
-" cli-override|file-override|prefer-file
-let g:prettier#config#config_precedence = 'prefer-file'
 " Flow
 let g:flow#autoclose=1
 " MJML
@@ -231,11 +226,9 @@ autocmd BufEnter *.mjml setlocal filetype=xml
 au FileType clojure nmap <buffer> <silent> <Leader>j <Plug>FireplaceDjump
 " Yank history
 nnoremap <silent> <Leader>y :<C-u>CocList -A --normal yank<cr>
-" Conjure
-" let g:coc_global_extensions = ['coc-conjure']
 " COC
-" " nmap <silent> <C-p> <Plug>(coc-diagnostic-prev)
-" " nmap <silent> <C-n> <Plug>(coc-diagnostic-next)
-" Ale
-nmap <silent> <C-p> <Plug>(ale_previous_wrap)
-nmap <silent> <C-n> <Plug>(ale_next_wrap)
+nmap <silent> <C-p> <Plug>(coc-diagnostic-prev)
+nmap <silent> <C-n> <Plug>(coc-diagnostic-next)
+let g:coc_global_extensions = ['coc-json', 'coc-sql', 'coc-css', 'coc-html', 'coc-eslint', 'coc-conjure', 'coc-sh', 'coc-yank', 'coc-vimlsp', 'coc-xml', 'coc-yaml', 'coc-tsserver' ]
+" Prettier
+nmap <leader>p :Prettier<CR>
