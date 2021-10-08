@@ -20,6 +20,7 @@ alias jpp="jq '.'"
 alias sp="cd $PROJ/SmartProcure"
 alias cat="bat"
 alias branches="git for-each-ref --count=10 --sort=-committerdate refs/heads/ --format='%(refname:short)' | fzf | xargs git checkout"
+alias start="DEBUG=spark:* DEBUG_DEPTH=100 npm start"
 # Paging via Vim
 export MANPAGER="/bin/sh -c \"col -b | vim --not-a-term -c 'set ft=man ts=8 nomod nolist noma' -\""
 # FZF

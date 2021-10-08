@@ -32,8 +32,6 @@ Plug 'farmergreg/vim-lastplace'
 Plug 'mhinz/vim-startify'
 " File commands
 Plug 'tpope/vim-eunuch'
-" Flow
-Plug 'flowtype/vim-flow', {'for': 'javascript'}
 " Extend % matching
 Plug 'vim-scripts/matchit.zip', {'for': ['html', 'xml', 'sh', 'vim']}
 " JSX
@@ -51,6 +49,8 @@ Plug 'prettier/vim-prettier', {
   \ 'for': ['javascript', 'typescript', 'css', 'less', 'scss', 'json', 'graphql', 'markdown', 'vue', 'yaml', 'html'] }
 " Codeowners
 Plug 'rhysd/vim-syntax-codeowners'
+" Handlebars/Mustache templates
+Plug 'mustache/vim-mustache-handlebars', {'for': 'hbs'}
 call plug#end()
 " Color theme
 colorscheme tir_black
@@ -179,13 +179,10 @@ nmap <Leader>gs :Gstatus<CR>
 nmap <Leader>gb :Gblame<CR>
 nmap <Leader>gc :Gcommit<CR>
 nmap <Leader>gd :terminal git diff<CR>
-" nmap <Leader>gl :terminal git tree<CR>
 nmap <Leader>gl :BCommits!<CR>
-nmap <Leader>gg :Ggrep<Space>
-nmap <Leader>ge :Gedit<Space>
 nmap <Leader>gf :Git fetch<CR>
-nmap <Leader>gP :Git pull<CR>
 nmap <Leader>gp :Git push<CR>
+nmap <Leader>gP :Git pull<CR>
 nmap <Leader>gup :!git push -u origin $(git rev-parse --abbrev-ref HEAD)<CR>
 nmap <Leader>gn :GitGutterNextHunk<CR>
 " Open lines without changing to Insert mode
@@ -196,7 +193,6 @@ let g:netrw_liststyle = 3
 " Display full path of current file
 nmap <Leader>n :echo expand('%:p')<CR>
 " Javascript
-" au FileType javascript nmap <buffer> <silent> <Leader>j :FlowJumpToDef<CR>
 au FileType javascript nmap <silent> <Leader>j <Plug>(coc-definition)
 au FileType javascript nmap <silent> gd <Plug>(coc-definition)
 au FileType javascript nmap <silent> gr <Plug>(coc-references)
@@ -219,8 +215,6 @@ nmap <Leader>r :Startify<CR>
 let g:startify_list_order = ['dir']
 let g:startify_change_to_dir = 0
 let g:startify_custom_header = []
-" Flow
-let g:flow#autoclose=1
 " MJML
 autocmd BufEnter *.mjml setlocal filetype=xml
 au FileType clojure nmap <buffer> <silent> <Leader>j <Plug>FireplaceDjump
@@ -231,4 +225,6 @@ nmap <silent> <C-p> <Plug>(coc-diagnostic-prev)
 nmap <silent> <C-n> <Plug>(coc-diagnostic-next)
 let g:coc_global_extensions = ['coc-json', 'coc-sql', 'coc-css', 'coc-html', 'coc-eslint', 'coc-conjure', 'coc-sh', 'coc-yank', 'coc-vimlsp', 'coc-xml', 'coc-yaml', 'coc-tsserver' ]
 " Prettier
+let g:prettier#config#semi = 'false'
+let g:prettier#config#single_quote = 'true'
 nmap <leader>p :Prettier<CR>
