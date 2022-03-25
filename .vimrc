@@ -51,6 +51,8 @@ Plug 'prettier/vim-prettier', {
 Plug 'rhysd/vim-syntax-codeowners'
 " Handlebars/Mustache templates
 Plug 'mustache/vim-mustache-handlebars', {'for': 'hbs'}
+" Svelte
+Plug 'leafOfTree/vim-svelte-plugin'
 call plug#end()
 " Color theme
 colorscheme tir_black
@@ -175,9 +177,9 @@ set grepformat^=%f:%l:%c:%m
 " Git
 nmap <Leader>gh :Gbrowse<CR>
 vmap <Leader>gh :Gbrowse<CR>
-nmap <Leader>gs :Gstatus<CR>
-nmap <Leader>gb :Gblame<CR>
-nmap <Leader>gc :Gcommit<CR>
+nmap <Leader>gs :Git<CR>
+nmap <Leader>gb :Git blame<CR>
+nmap <Leader>gc :Git commit<CR>
 nmap <Leader>gd :terminal git diff<CR>
 nmap <Leader>gl :BCommits!<CR>
 nmap <Leader>gf :Git fetch<CR>
@@ -193,9 +195,11 @@ let g:netrw_liststyle = 3
 " Display full path of current file
 nmap <Leader>n :echo expand('%:p')<CR>
 " Javascript
-au FileType javascript nmap <silent> <Leader>j <Plug>(coc-definition)
-au FileType javascript nmap <silent> gd <Plug>(coc-definition)
-au FileType javascript nmap <silent> gr <Plug>(coc-references)
+au FileType javascript,typescript nmap <silent> <Leader>j <Plug>(coc-definition)
+au FileType javascript,typescript nmap <silent> gd <Plug>(coc-definition)
+au FileType javascript,typescript nmap <silent> gr <Plug>(coc-references)
+au FileType javascript,typescript nmap <silent> gy <Plug>(coc-type-definition)
+au FileType javascript,typescript nmap <silent> gi <Plug>(coc-implementation)
 " Use K to show documentation in preview window.
 nnoremap <silent> K :call <SID>show_documentation()<CR>
 
@@ -224,6 +228,7 @@ nnoremap <silent> <Leader>y :<C-u>CocList -A --normal yank<cr>
 nmap <silent> <C-p> <Plug>(coc-diagnostic-prev)
 nmap <silent> <C-n> <Plug>(coc-diagnostic-next)
 let g:coc_global_extensions = ['coc-json', 'coc-sql', 'coc-css', 'coc-html', 'coc-eslint', 'coc-conjure', 'coc-sh', 'coc-yank', 'coc-vimlsp', 'coc-xml', 'coc-yaml', 'coc-tsserver' ]
+command! -nargs=0 Format :call CocActionAsync('format')
 " Prettier
 let g:prettier#config#semi = 'false'
 let g:prettier#config#single_quote = 'true'

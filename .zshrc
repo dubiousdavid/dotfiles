@@ -21,6 +21,7 @@ alias sp="cd $PROJ/SmartProcure"
 alias cat="bat"
 alias branches="git for-each-ref --count=10 --sort=-committerdate refs/heads/ --format='%(refname:short)' | fzf | xargs git checkout"
 alias start="DEBUG=spark:* DEBUG_DEPTH=100 npm start"
+alias tableau="/Applications/Tableau\ Desktop\ 2021.2.app/Contents/MacOS/Tableau -DDisableVerifyConnectorPluginSignature=true"
 # Paging via Vim
 export MANPAGER="/bin/sh -c \"col -b | vim --not-a-term -c 'set ft=man ts=8 nomod nolist noma' -\""
 # FZF
@@ -122,14 +123,6 @@ show-tabs() {
   grep $'\t' $1
 }
 
-serve() {
-  if [[ -z $1 ]]; then
-    browser-sync start --server
-  else
-    browser-sync start --server --files "$1"
-  fi
-}
-
 reverse() {
   echo $1 | rev
 }
@@ -150,7 +143,7 @@ py() {
   esac
 }
 
-# Arguments: host, keys
+# Arguments: host, pattern
 redis-del-bulk() {
   redis-cli -h "$1" --raw keys "$2" | xargs redis-cli -h "$1" del
 }
